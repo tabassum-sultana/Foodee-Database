@@ -66,26 +66,39 @@ app.post("/api/orders", async (req, res) => {
 
   try {
     await connection.beginTransaction();
-    const [orderResult] = await connection.query(
-      `INSERT INTO orders
-        (order_code, session_id, customer_name, phone, address, note, payment_method, payment_status, subtotal, delivery_fee, discount, total)
-       VALUES
-        (:orderCode, :sessionId, :name, :phone, :address, :note, :paymentMethod, :paymentStatus, :subtotal, :delivery, :discount, :total)`,
-      {
-        orderCode,
-        sessionId: sessionId || null,
-        name: customer.name,
-        phone: customer.phone,
-        address: customer.address,
-        note: customer.note || null,
-        paymentMethod,
-        paymentStatus: paymentMethod === "Cash on Delivery" ? "Pending" : "Paid",
-        subtotal: totals.subtotal,
-        delivery: totals.delivery,
-        discount: totals.discount,
-        total: totals.total
-      }
-    );
+    const orderParams = {
+      orderCode,
+      sessionId: sessionId || null,
+      name: customer.name,
+      phone: customer.phone,
+      address: customer.address,
+      note: customer.note || null,
+      paymentMethod,
+      paymentStatus: paymentMethod === "Cash on Delivery" ? "Pending" : "Paid",
+      subtotal: totals.subtotal,
+      delivery: totals.delivery,
+      discount: totals.discount,
+      total: totals.total
+    };
+    let orderResult;
+    try {
+      [orderResult] = await connection.query(
+        `INSERT INTO orders
+          (order_code, session_id, customer_name, phone, address, note, payment_method, payment_status, subtotal, delivery_fee, discount, total)
+         VALUES
+          (:orderCode, :sessionId, :name, :phone, :address, :note, :paymentMethod, :paymentStatus, :subtotal, :delivery, :discount, :total)`,
+        orderParams
+      );
+    } catch (error) {
+      if (!/session_id/i.test(error.message)) throw error;
+      [orderResult] = await connection.query(
+        `INSERT INTO orders
+          (order_code, customer_name, phone, address, note, payment_method, payment_status, subtotal, delivery_fee, discount, total)
+         VALUES
+          (:orderCode, :name, :phone, :address, :note, :paymentMethod, :paymentStatus, :subtotal, :delivery, :discount, :total)`,
+        orderParams
+      );
+    }
 
     for (const item of items) {
       await connection.query(
@@ -121,13 +134,25 @@ app.post("/api/orders", async (req, res) => {
 });
 
 app.get("/api/orders", async (_req, res) => {
-  const [orders] = await db.query(`
-    SELECT id, order_code AS orderCode, session_id AS sessionId, customer_name AS customerName, phone, address, note,
-      payment_method AS paymentMethod, payment_status AS paymentStatus, order_status AS orderStatus,
-      subtotal, delivery_fee AS deliveryFee, discount, total, created_at AS createdAt
-    FROM orders
-    ORDER BY created_at DESC
-  `);
+  let orders;
+  try {
+    [orders] = await db.query(`
+      SELECT id, order_code AS orderCode, session_id AS sessionId, customer_name AS customerName, phone, address, note,
+        payment_method AS paymentMethod, payment_status AS paymentStatus, order_status AS orderStatus,
+        subtotal, delivery_fee AS deliveryFee, discount, total, created_at AS createdAt
+      FROM orders
+      ORDER BY created_at DESC
+    `);
+  } catch (error) {
+    if (!/session_id/i.test(error.message)) throw error;
+    [orders] = await db.query(`
+      SELECT id, order_code AS orderCode, NULL AS sessionId, customer_name AS customerName, phone, address, note,
+        payment_method AS paymentMethod, payment_status AS paymentStatus, order_status AS orderStatus,
+        subtotal, delivery_fee AS deliveryFee, discount, total, created_at AS createdAt
+      FROM orders
+      ORDER BY created_at DESC
+    `);
+  }
 
   if (!orders.length) return res.json([]);
 
