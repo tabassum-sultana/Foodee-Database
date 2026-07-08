@@ -11,6 +11,19 @@
 .order-info-card img { width: 42px; height: 42px; object-fit: contain; margin: 0 auto 12px; }
 .order-info-card p { margin: 0 0 8px; color: var(--muted); }
 .order-info-card strong { font-size: 18px; }
+.confirmation-card { padding: 26px; margin-bottom: 32px; text-align: left; }
+.confirmation-head { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 18px; }
+.confirmation-head h2 { margin: 0 0 6px; }
+.confirmation-head p { margin: 0; color: var(--muted); line-height: 1.5; }
+.confirmation-head > strong { color: var(--green); font-size: 26px; white-space: nowrap; }
+.confirmation-items { display: grid; gap: 10px; }
+.confirmation-items article { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 14px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
+.confirmation-items h3 { margin: 0 0 4px; font-size: 16px; }
+.confirmation-items p { margin: 0; color: var(--muted); font-size: 13px; }
+.confirmation-items span { color: var(--muted); }
+.confirmation-items strong { color: var(--ink); white-space: nowrap; }
+.confirmation-totals { display: flex; justify-content: flex-end; gap: 18px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); }
+.confirmation-totals strong { color: var(--ink); margin-left: 6px; }
 .tracking-card { padding: 32px; text-align: left; }
 .tracking-card h2 { margin: 0 0 30px; }
 .track-steps { position: relative; display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; text-align: center; }
@@ -98,5 +111,13 @@
   .order-info-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .footer-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gallery-main { min-height: 360px; }
+}
+
+@media (max-width: 620px) {
+  .confirmation-head,
+  .confirmation-items article {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
 }
 

@@ -17,11 +17,30 @@ const FoodeeAPI = (() => {
     });
   }
 
+  function getContacts() {
+    return request("/api/contacts");
+  }
+
   function createOrder(payload) {
     return request("/api/orders", {
       method: "POST",
       body: JSON.stringify(payload)
     });
+  }
+
+  function getOrders() {
+    return request("/api/orders");
+  }
+
+  function saveCartEvent(payload) {
+    return request("/api/cart-events", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  function getCartEvents() {
+    return request("/api/cart-events");
   }
 
   async function loadProducts() {
@@ -35,5 +54,5 @@ const FoodeeAPI = (() => {
     }));
   }
 
-  return { createOrder, loadProducts, saveContact };
+  return { createOrder, getCartEvents, getContacts, getOrders, loadProducts, saveCartEvent, saveContact };
 })();

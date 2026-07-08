@@ -15,6 +15,35 @@ document.addEventListener("DOMContentLoaded", async () => {
   const qtyButtons = qtyControl ? qtyControl.querySelectorAll("button") : [];
   const qtyValue = qtyControl ? qtyControl.querySelector("span") : null;
   let detailQty = 1;
+  let selectedAddOns = [];
+
+  const addOnOptions = [
+    { name: "Extra Cheese", price: 30 },
+    { name: "Chicken Slice", price: 40 },
+    { name: "Jalapenos", price: 20 }
+  ];
+
+  function sizeOptions() {
+    return [
+      { name: "Regular", price: product.price },
+      { name: "Large", price: product.price + 50 },
+      { name: "XL", price: product.price + 100 }
+    ];
+  }
+
+  function selectedSize() {
+    const active = document.querySelector(".choice-card.active");
+    const index = Math.max(0, [...document.querySelectorAll(".choice-card")].indexOf(active));
+    return sizeOptions()[index] || sizeOptions()[0];
+  }
+
+  function unitPrice() {
+    return selectedSize().price + selectedAddOns.reduce((sum, item) => sum + item.price, 0);
+  }
+
+  function updatePrice() {
+    document.querySelectorAll("[data-product-price]").forEach((el) => el.textContent = FoodeeCart.money(unitPrice()));
+  }
 
   function setDetailQty(nextQty) {
     detailQty = Math.max(1, Number(nextQty) || 1);
@@ -39,6 +68,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   addButton?.setAttribute("data-add-cart", product.id);
   wishlistButton?.setAttribute("data-wishlist", product.id);
+  document.querySelectorAll(".choice-card").forEach((card, index) => {
+    const option = sizeOptions()[index];
+    if (!option) return;
+    card.childNodes[0].textContent = option.name;
+    card.querySelector("small").textContent = FoodeeCart.money(option.price);
+  });
+  document.querySelectorAll(".addon-card").forEach((card, index) => {
+    const option = addOnOptions[index];
+    if (!option) return;
+    card.dataset.addonName = option.name;
+    card.dataset.addonPrice = String(option.price);
+  });
+  updatePrice();
   setDetailQty(1);
   if (related) related.innerHTML = FoodeeData.products.filter((item) => item.id !== product.id).slice(0, 4).map(productCard).join("");
   window.FoodeeWishlistRefresh?.();
@@ -66,6 +108,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     card.addEventListener("click", () => {
       card.parentElement.querySelectorAll(".choice-card").forEach((item) => item.classList.remove("active"));
       card.classList.add("active");
+      updatePrice();
     });
+  });
+
+  document.querySelectorAll(".addon-card").forEach((card) => {
+    const button = card.querySelector("button");
+    button?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const addon = { name: card.dataset.addonName, price: Number(card.dataset.addonPrice || 0) };
+      const exists = selectedAddOns.some((item) => item.name === addon.name);
+      selectedAddOns = exists ? selectedAddOns.filter((item) => item.name !== addon.name) : [...selectedAddOns, addon];
+      card.classList.toggle("active", !exists);
+      button.textContent = exists ? "+" : "x";
+      updatePrice();
+    });
+  });
+
+  addButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const size = selectedSize();
+    FoodeeCart.add(product.id, detailQty, {
+      sizeName: size.name,
+      unitPrice: unitPrice(),
+      addOns: selectedAddOns
+    });
+    showToast("Added to cart");
   });
 });

@@ -9,11 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function render() {
     const items = FoodeeCart.items();
     if (products) {
-      products.innerHTML = items.map(({ product, qty }) => `
+      products.innerHTML = items.map(({ product, qty, key, unitPrice, optionSummary, displayName }) => `
         <article>
           <img src="${asset(product.image)}" alt="${product.name}" />
-          <div><h3>${product.name}</h3><div class="qty-control"><button type="button" data-update-cart="${product.id}" data-delta="-1">-</button><span>${qty}</span><button type="button" data-update-cart="${product.id}" data-delta="1">+</button></div></div>
-          <strong class="price">${FoodeeCart.money(product.price * qty)}</strong>
+          <div><h3>${displayName}</h3>${optionSummary ? `<p>${optionSummary}</p>` : ""}<div class="qty-control"><button type="button" data-update-cart="${key}" data-delta="-1">-</button><span>${qty}</span><button type="button" data-update-cart="${key}" data-delta="1">+</button></div></div>
+          <strong class="price">${FoodeeCart.money(unitPrice * qty)}</strong>
         </article>`).join("");
     }
     const totals = FoodeeCart.totals();
@@ -42,10 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();
     const activePayment = document.querySelector(".payment-option.active h3")?.textContent || "bKash";
     const totals = FoodeeCart.totals();
-    const cartItems = FoodeeCart.items().map(({ product, qty }) => ({
+    const cartItems = FoodeeCart.items().map(({ product, qty, unitPrice, optionSummary, displayName, sizeName, addOns }) => ({
       id: product.id,
-      name: product.name,
-      price: product.price,
+      name: displayName,
+      baseName: product.name,
+      price: unitPrice,
+      optionSummary,
+      sizeName,
+      addOns,
       qty
     }));
 
@@ -55,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const payload = {
+      sessionId: FoodeeCart.sessionId(),
       customer: {
         name: form.querySelector("#fullName").value.trim(),
         phone: form.querySelector("#phone").value.trim(),
@@ -66,21 +71,26 @@ document.addEventListener("DOMContentLoaded", () => {
       items: cartItems
     };
 
-    let order = {
+    const localOrderDetails = {
       orderCode: `FD${Date.now().toString().slice(-8)}`,
+      sessionId: payload.sessionId,
+      customer: payload.customer,
+      items: cartItems,
+      totals,
       total: totals.total,
       method: activePayment,
       status: activePayment === "Cash on Delivery" ? "Pending" : "Paid",
       createdAt: new Date().toISOString()
     };
+    let order = localOrderDetails;
 
     try {
-      order = await FoodeeAPI.createOrder(payload);
+      order = { ...localOrderDetails, ...(await FoodeeAPI.createOrder(payload)) };
     } catch {
       showToast("Order saved locally");
     }
 
-    FoodeeCart.saveOrder(order);
+    FoodeeCart.saveLocalOrder(order);
     FoodeeCart.clear();
     location.href = page("success.html");
   });

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Admin Panel - Foodee</title>
+  <meta name="description" content="Foodee admin panel for orders and cart activity." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/mobile.css" />
+</head>
+<body data-page="admin">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/admin.html">Admin</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="admin-hero shell">
+    <div>
+      <p class="eyebrow"><img src="assets/icons/receipt-check.png" alt="" />Restaurant admin</p>
+      <h1>Full Admin Overview</h1>
+      <p>See orders, customer details, cart actions, wishlist saves, menu items, contact messages, payment totals, and browser session activity.</p>
+    </div>
+    <div class="admin-actions">
+      <button class="btn btn-outline" type="button" id="refreshAdmin">Refresh</button>
+      <button class="btn btn-outline" type="button" id="clearAdmin">Clear Local Data</button>
+      <a class="btn btn-primary" href="html/menu.html"><img src="assets/icons/menu-list.png" alt="" />Open Menu</a>
+    </div>
+  </section>
+
+  <section class="admin-stats shell" aria-label="Order summary">
+    <article><span>Total Orders</span><strong id="statOrders">0</strong></article>
+    <article><span>Revenue</span><strong id="statRevenue">BDT 0</strong></article>
+    <article><span>Cart Items</span><strong id="statCart">0</strong></article>
+    <article><span>Pending</span><strong id="statPending">0</strong></article>
+    <article><span>Wishlist</span><strong id="statWishlist">0</strong></article>
+    <article><span>Messages</span><strong id="statContacts">0</strong></article>
+  </section>
+
+  <section class="admin-layout shell">
+    <section class="admin-panel order-board">
+      <div class="panel-head">
+        <div>
+          <h2>Customer Orders</h2>
+          <p>Complete order details from checkout.</p>
+        </div>
+        <label class="admin-search"><span class="search-icon" aria-hidden="true"></span><input id="adminSearch" type="search" placeholder="Search customer, phone, food..." /></label>
+      </div>
+      <div id="orderList" class="order-list"></div>
+      <div id="searchDetailList" class="search-detail-list"></div>
+    </section>
+
+    <aside class="admin-side">
+      <section class="admin-panel">
+        <div class="panel-head compact">
+          <div>
+            <h2>Current Cart</h2>
+            <p>Items added in this browser.</p>
+          </div>
+        </div>
+        <div id="currentCartList" class="side-list"></div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-head compact">
+          <div>
+            <h2>Add-to-Cart Log</h2>
+            <p>Recent cart and wishlist actions.</p>
+          </div>
+        </div>
+        <div id="activityList" class="activity-list"></div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="panel-head compact">
+          <div>
+            <h2>Wishlist</h2>
+            <p>Foods saved by this customer.</p>
+          </div>
+        </div>
+        <div id="wishlistList" class="side-list"></div>
+      </section>
+    </aside>
+  </section>
+
+  <section class="admin-wide-grid shell">
+    <section class="admin-panel">
+      <div class="panel-head compact">
+        <div>
+          <h2>Contact Messages</h2>
+          <p>Customer questions and support requests.</p>
+        </div>
+      </div>
+      <div id="contactList" class="contact-list"></div>
+    </section>
+
+    <section class="admin-panel">
+      <div class="panel-head compact">
+        <div>
+          <h2>Menu Products</h2>
+          <p>All visible food items with category and price.</p>
+        </div>
+      </div>
+      <div id="productList" class="product-admin-list"></div>
+    </section>
+  </section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

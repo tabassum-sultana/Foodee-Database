@@ -79,6 +79,14 @@
 .addon-card strong { font-size: 14px; }
 .addon-card small { color: var(--muted); }
 .addon-card button { width: 30px; height: 30px; border: 0; background: transparent; color: var(--green); font-size: 22px; }
+.addon-card.active {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+.addon-card.active button {
+  color: var(--green-dark);
+  font-weight: 900;
+}
 .product-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 28px; }
 .qty-control {
   height: 48px;

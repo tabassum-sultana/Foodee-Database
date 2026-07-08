@@ -11,16 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!items.length) {
       list.innerHTML = `<div class="empty-state">Your cart is empty.</div>`;
     } else {
-      list.innerHTML = items.map(({ product, qty }) => `
+      list.innerHTML = items.map(({ product, qty, key, unitPrice, optionSummary, displayName }) => `
         <article class="cart-item">
           <img class="cart-item-img" src="${asset(product.image)}" alt="${product.name}" />
           <div>
-            <h3>${product.name}</h3>
-            <p>${product.desc}</p>
-            <strong class="price">${FoodeeCart.money(product.price)}</strong>
+            <h3>${displayName}</h3>
+            <p>${optionSummary || product.desc}</p>
+            <strong class="price">${FoodeeCart.money(unitPrice)}</strong>
           </div>
-          <div class="qty-control"><button type="button" data-update-cart="${product.id}" data-delta="-1">−</button><span>${qty}</span><button type="button" data-update-cart="${product.id}" data-delta="1">+</button></div>
-          <button class="remove-item" type="button" data-remove-cart="${product.id}" aria-label="Remove ${product.name}"><img src="${asset("assets/icons/trash.png")}" alt="" /></button>
+          <div class="qty-control"><button type="button" data-update-cart="${key}" data-delta="-1">-</button><span>${qty}</span><button type="button" data-update-cart="${key}" data-delta="1">+</button></div>
+          <button class="remove-item" type="button" data-remove-cart="${key}" aria-label="Remove ${product.name}"><img src="${asset("assets/icons/trash.png")}" alt="" /></button>
         </article>`).join("");
     }
     const totals = FoodeeCart.totals();

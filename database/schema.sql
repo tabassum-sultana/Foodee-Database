@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   order_code VARCHAR(24) NOT NULL UNIQUE,
+  session_id VARCHAR(80),
   customer_name VARCHAR(120) NOT NULL,
   phone VARCHAR(40) NOT NULL,
   address TEXT NOT NULL,
@@ -60,4 +61,17 @@ CREATE TABLE IF NOT EXISTS order_items (
   unit_price DECIMAL(10,2) NOT NULL,
   line_total DECIMAL(10,2) NOT NULL,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS cart_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(80) NOT NULL,
+  action VARCHAR(80) NOT NULL,
+  product_id VARCHAR(80) NOT NULL,
+  product_name VARCHAR(120) NOT NULL,
+  category VARCHAR(80),
+  quantity INT DEFAULT 0,
+  unit_price DECIMAL(10,2) DEFAULT 0,
+  cart_total DECIMAL(10,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

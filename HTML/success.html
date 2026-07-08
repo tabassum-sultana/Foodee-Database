@@ -18,6 +18,7 @@
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="index.html">Home</a>
       <a href="html/menu.html">Menu</a>
+      <a href="html/admin.html">Admin</a>
       <a href="html/about.html">About</a>
       <a href="html/contact.html">Contact</a>
     </nav>
@@ -42,6 +43,22 @@
     <article><img src="assets/payments/card.png" alt="" /><p>Total Amount</p><strong id="successTotal">BDT 548</strong></article>
     <article><img src="assets/payments/card.png" alt="" /><p>Payment Method</p><strong id="successMethod">bKash</strong></article>
     <article><img src="assets/icons/receipt-check.png" alt="" /><p>Payment Status</p><strong id="successStatus">Paid</strong></article>
+  </section>
+
+  <section class="confirmation-card shell">
+    <div class="confirmation-head">
+      <div>
+        <h2>Order Confirmation</h2>
+        <p id="successCustomer">Customer details will appear here.</p>
+      </div>
+      <strong id="successBill">BDT 0</strong>
+    </div>
+    <div id="successItems" class="confirmation-items"></div>
+    <div class="confirmation-totals">
+      <span>Subtotal <strong id="successSubtotal">BDT 0</strong></span>
+      <span>Delivery <strong id="successDelivery">BDT 0</strong></span>
+      <span>Discount <strong id="successDiscount">BDT 0</strong></span>
+    </div>
   </section>
 
   <section class="tracking-card shell">

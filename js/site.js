@@ -31,7 +31,9 @@ function toggleWishlist(id) {
   if (!id) return false;
   const items = readWishlist();
   const exists = items.includes(id);
+  const saved = !exists;
   writeWishlist(exists ? items.filter((item) => item !== id) : [...items, id]);
+  window.FoodeeCart?.logActivity?.(saved ? "Added to wishlist" : "Removed from wishlist", id, 1);
   return !exists;
 }
 
@@ -80,6 +82,7 @@ function mountFooter() {
         <h3>Quick Links</h3>
         <a href="${home()}">Home</a>
         <a href="${page("menu.html")}">Menu</a>
+        <a href="${page("admin.html")}">Admin Panel</a>
         <a href="${page("about.html")}">About Us</a>
         <a href="${page("contact.html")}">Contact Us</a>
         <a href="${page("contact.html")}">FAQs</a>
@@ -252,6 +255,7 @@ document.addEventListener("DOMContentLoaded", initSite);
       menu: "menu.html",
       about: "about.html",
       contact: "contact.html",
+      admin: "admin.html",
       product: "menu.html",
       cart: "cart.html",
       checkout: "cart.html",
