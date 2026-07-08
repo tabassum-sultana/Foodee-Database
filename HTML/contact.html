@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Contact Us - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/contact.css" />
+</head>
+<body data-page="contact">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a class="active" href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="contact-hero shell">
+    <div>
+      <p class="eyebrow"><img src="assets/icons/fresh-leaf.png" alt="" />We Are Here For You</p>
+      <h1>Stay<br />in <span class="underlined-word">touch</span></h1>
+      <p>Have a question, suggestion, or feedback? We would love to hear from you.</p>
+    </div>
+    <figure class="hero-image contact-hero-image"><img src="assets/food/combos/contact-fresh-combo.png" alt="Foodee fresh drink and salad combo" /></figure>
+  </section>
+
+  <section class="contact-layout shell">
+    <aside class="contact-card">
+      <h2>Contact Information</h2>
+      <div class="info-list">
+        <article class="info-item"><img src="assets/icons/location-pin.png" alt="" /><div><h3>Our Location</h3><p>Dhanmondi 27,<br />Dhaka 1209</p></div></article>
+        <article class="info-item"><img src="assets/icons/phone-circle.png" alt="" /><div><h3>Phone Number</h3><p>+880 1712 345 678</p></div></article>
+        <article class="info-item"><img src="assets/contact/email.png" alt="" /><div><h3>Email Address</h3><p>hello@foodee.com.bd</p></div></article>
+        <article class="info-item"><img src="assets/icons/time-circle.png" alt="" /><div><h3>Opening Hours</h3><p>Mon - Sun: 10:00 AM - 11:00 PM<br />Open every day.</p></div></article>
+        <article class="info-item"><img src="assets/icons/support-247.png" alt="" /><div><h3>Follow Us</h3><div class="social-links"><img src="assets/social/facebook.png" alt="Facebook" /><img src="assets/social/instagram.png" alt="Instagram" /><img src="assets/social/twitter.png" alt="Twitter" /><img src="assets/social/whatsapp.png" alt="WhatsApp" /></div></div></article>
+      </div>
+    </aside>
+    <section class="form-card">
+      <h2>Send Us a Message</h2>
+      <form class="form-grid" id="contactForm">
+        <div class="form-field"><label for="name">Full Name</label><input id="name" type="text" placeholder="Enter your full name" required /></div>
+        <div class="form-field"><label for="email">Email Address</label><input id="email" type="email" placeholder="Enter your email address" required /></div>
+        <div class="form-field"><label for="subject">Subject</label><input id="subject" type="text" placeholder="Enter your subject" required /></div>
+        <div class="form-field"><label for="message">Message</label><textarea id="message" placeholder="Type your message here..." required></textarea></div>
+        <button class="btn btn-primary" type="submit"><img src="assets/icons/send.png" alt="" />Send Message</button>
+      </form>
+    </section>
+  </section>
+
+  <section class="map-section shell">
+    <h2>Find Us</h2>
+    <div class="map-card" aria-label="Map location in Dhaka"></div>
+  </section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/contact.js"></script>
+</body>
+</html>

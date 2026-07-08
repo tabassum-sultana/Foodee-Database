@@ -1,0 +1,17 @@
+{
+  "name": "foodee-restaurant-ordering",
+  "version": "1.0.0",
+  "description": "Foodee restaurant ordering website with Node.js and MySQL backend.",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "node server/app.js",
+    "db:seed": "node server/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5"
+  }
+}

@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Your Cart - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/cart.css" />
+</head>
+<body data-page="cart">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-title page-title-visual shell">
+    <div class="page-title-copy">
+      <p class="eyebrow"><img src="assets/icons/fresh-leaf.png" alt="" />Fresh. Fast. Foodee.</p>
+      <h1>Your Cart</h1>
+      <p>Review your selected items before checkout.</p>
+    </div>
+    <figure class="hero-image cart-hero-image"><img src="assets/food/combos/product-chicken-combo.png" alt="Foodee crispy chicken combo" /></figure>
+  </section>
+  <section class="cart-layout shell">
+    <div>
+      <div class="cart-panel"><div class="cart-items" id="cartItems"></div></div>
+      <a class="btn btn-outline cart-back" href="html/menu.html">Continue Shopping</a>
+    </div>
+    <aside class="summary-card">
+      <h2>Order Summary</h2>
+      <div class="summary-line"><span>Subtotal</span><strong id="cartSubtotal">BDT 0</strong></div>
+      <div class="summary-line"><span>Delivery Fee</span><strong id="cartDelivery">BDT 0</strong></div>
+      <div class="summary-line"><span>Discount</span><strong id="cartDiscount">- BDT 0</strong></div>
+      <div class="total-line"><span>Total</span><strong id="cartTotal">BDT 0</strong></div>
+      <div class="promo-row"><input type="text" placeholder="Enter promo code" /><button type="button">Apply</button></div>
+      <a class="btn btn-primary" href="html/checkout.html"><img src="assets/icons/lock.png" alt="" />Proceed to Checkout</a>
+      <p class="safe-note"><img src="assets/icons/shield-check.png" alt="" />Secure checkout. Your information is safe with us.</p>
+    </aside>
+  </section>
+  <section class="service-strip shell" aria-label="Foodee benefits">
+  <article><img src="assets/icons/delivery-fast.png" alt="" /><div><h3>Fast Delivery</h3><p>Quick delivery right to your doorstep.</p></div></article>
+  <article><img src="assets/icons/fresh-leaf.png" alt="" /><div><h3>Fresh Ingredients</h3><p>Prepared with fresh, quality ingredients.</p></div></article>
+  <article><img src="assets/icons/safe-secure.png" alt="" /><div><h3>Safe & Secure</h3><p>Clean packaging you can trust.</p></div></article>
+  <article><img src="assets/icons/support-247.png" alt="" /><div><h3>24/7 Support</h3><p>We are here to help anytime.</p></div></article>
+</section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/cart-page.js"></script>
+</body>
+</html>

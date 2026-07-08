@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Our Menu - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/menu.css" />
+</head>
+<body data-page="menu">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a class="active" href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="menu-hero shell">
+    <div>
+      <h1>Our Menu</h1>
+      <p>Explore fresh meals, tasty snacks, and refreshing drinks delivered fast.</p>
+      <label class="menu-search"><span class="search-icon" aria-hidden="true"></span><input id="menuSearch" type="search" placeholder="Search for dishes..." /></label>
+    </div>
+    <figure class="hero-image menu-hero-image"><img src="assets/food/combos/menu-pizza-combo.png" alt="Foodee pizza pasta and salad combo" /></figure>
+  </section>
+  <section class="menu-tabs shell" id="categoryList" aria-label="Menu categories"></section>
+  <section class="product-grid menu-grid shell" id="menuProducts"></section>
+  <section class="service-strip shell" aria-label="Foodee benefits">
+  <article><img src="assets/icons/delivery-fast.png" alt="" /><div><h3>Fast Delivery</h3><p>Quick delivery right to your doorstep.</p></div></article>
+  <article><img src="assets/icons/fresh-leaf.png" alt="" /><div><h3>Fresh Ingredients</h3><p>Prepared with fresh, quality ingredients.</p></div></article>
+  <article><img src="assets/icons/safe-secure.png" alt="" /><div><h3>Safe & Secure</h3><p>Clean packaging you can trust.</p></div></article>
+  <article><img src="assets/icons/support-247.png" alt="" /><div><h3>24/7 Support</h3><p>We are here to help anytime.</p></div></article>
+</section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/menu.js"></script>
+</body>
+</html>

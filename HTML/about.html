@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>About Us - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/about.css" />
+</head>
+<body data-page="about">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a class="active" href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="about-hero shell">
+    <div>
+      <p class="eyebrow"><img src="assets/icons/fresh-leaf.png" alt="" />Fresh. Fast. Foodee.</p>
+      <h1 class="decor-title">About <span class="underlined-word">Us</span></h1>
+      <p>Foodee is a fast and reliable food delivery service that brings fresh meals from your favorite restaurants straight to your doorstep.</p>
+      <p>We started with a simple idea: great food should be easy to order, quick to arrive, and enjoyable anytime.</p>
+      <a class="btn btn-primary" href="html/menu.html"><img src="assets/icons/fresh-leaf.png" alt="" />Explore Menu</a>
+    </div>
+    <figure class="about-photo"><img src="assets/food/dishes/about-friends.png" alt="Friends enjoying food" /></figure>
+  </section>
+
+  <section class="how-panel shell">
+    <h2 class="center-title">How It <span class="underlined-word">Works</span></h2>
+    <div class="process-grid">
+      <article class="process-card"><span class="step-badge">1</span><img src="assets/icons/menu-list.png" alt="" /><h3>Choose Your Food</h3><p>Browse menus from top restaurants and pick your favorite meals.</p></article>
+      <article class="process-card"><span class="step-badge">2</span><img src="assets/icons/receipt-check.png" alt="" /><h3>Place Your Order</h3><p>Add to cart and pay securely online.</p></article>
+      <article class="process-card"><span class="step-badge">3</span><img src="assets/icons/delivery-scooter.png" alt="" /><h3>Get It Delivered</h3><p>We prepare your order and deliver it hot and fresh to your door.</p></article>
+      <article class="process-card"><span class="step-badge">4</span><img src="assets/icons/hot-pot.png" alt="" /><h3>Enjoy Your Meal</h3><p>Sit back, relax, and enjoy delicious food without the wait.</p></article>
+    </div>
+  </section>
+
+  <section class="mission-panel shell">
+    <div class="mission-image"><img src="assets/food/dishes/garden-salad.png" alt="Fresh salad" /></div>
+    <div class="mission-copy">
+      <h2><span class="underlined-word">Our</span> Mission</h2>
+      <p>Our mission is to make everyday dining easier, faster, and better by connecting people with great food and reliable service across Bangladesh.</p>
+      <div class="mission-points">
+        <article><img src="assets/icons/fresh-leaf.png" alt="" /><h3>Freshness First</h3><p>We prioritize fresh ingredients and quality you can taste.</p></article>
+        <article><img src="assets/icons/shield-check.png" alt="" /><h3>Reliable Service</h3><p>Fast, safe, and on-time delivery you can always count on.</p></article>
+        <article><img src="assets/icons/heart.png" alt="" /><h3>Customer Happiness</h3><p>Your satisfaction is at the heart of everything we do.</p></article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

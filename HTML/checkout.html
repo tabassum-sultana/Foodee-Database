@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Checkout - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/checkout.css" />
+</head>
+<body data-page="checkout">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-title page-title-visual shell">
+    <div class="page-title-copy">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><strong>Checkout</strong></nav>
+      <h1>Checkout</h1>
+      <p>Enter your delivery details and place your order securely.</p>
+    </div>
+    <figure class="hero-image checkout-hero-image"><img src="assets/food/combos/checkout-cake-combo.png" alt="Foodee dessert checkout combo" /></figure>
+  </section>
+
+  <form id="checkoutForm" class="checkout-layout shell">
+    <section class="checkout-panel">
+      <h2 class="step-title"><span>1.</span>Delivery Details</h2>
+      <div class="form-grid">
+        <div class="form-field"><label for="fullName">Full Name</label><div class="input-wrap"><img src="assets/icons/user.png" alt="" /><input id="fullName" type="text" placeholder="Enter your full name" required /></div></div>
+        <div class="form-field"><label for="phone">Phone Number</label><div class="input-wrap"><img src="assets/icons/phone-circle.png" alt="" /><input id="phone" type="tel" placeholder="Enter your phone number" required /></div></div>
+        <div class="form-field"><label for="address">Delivery Address</label><div class="input-wrap"><img src="assets/icons/location-pin.png" alt="" /><textarea id="address" placeholder="Enter your full address" required></textarea></div></div>
+        <a class="location-link" href="#"><img src="assets/icons/location-pin.png" alt="" />Use Current Location</a>
+        <div class="form-field"><label for="note">Order Note <span style="color: var(--muted); font-weight: 500;">(Optional)</span></label><div class="input-wrap"><img src="assets/icons/menu-list.png" alt="" /><textarea id="note" placeholder="Any special instructions?"></textarea></div><small style="color: var(--muted);">e.g. gate number, hostel name, room number, etc.</small></div>
+      </div>
+
+      <h2 class="step-title" style="margin-top: 34px;"><span>2.</span>Payment Method</h2>
+      <div class="payment-list">
+        <div class="payment-option active"><span class="radio-dot"></span><div><h3>bKash / Nagad</h3><p>Pay securely using mobile banking</p></div><img src="assets/payments/bkash.png" alt="bKash" /></div>
+        <div class="payment-option"><span class="radio-dot"></span><div><h3>Credit / Debit Card</h3><p>Visa, Mastercard</p></div><img src="assets/payments/mastercard.png" alt="Card" /></div>
+        <div class="payment-option"><span class="radio-dot"></span><div><h3>Cash on Delivery</h3><p>Pay when your order arrives</p></div><img src="assets/payments/cash-hand.png" alt="Cash" /></div>
+      </div>
+      <p class="safe-note"><img src="assets/icons/lock.png" alt="" />Your payment information is secure and encrypted.</p>
+    </section>
+
+    <aside class="checkout-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-product" id="checkoutProducts"></div>
+      <div class="summary-line"><span>Subtotal</span><strong id="checkoutSubtotal">BDT 0</strong></div>
+      <div class="summary-line"><span>Delivery Fee</span><strong id="checkoutDelivery">BDT 0</strong></div>
+      <div class="summary-line"><span>Discount</span><strong id="checkoutDiscount">- BDT 0</strong></div>
+      <div class="total-line"><span>Total</span><strong id="checkoutTotal">BDT 0</strong></div>
+      <div class="savings-box"><img src="assets/icons/fresh-leaf.png" alt="" /><div><strong>You saved BDT 20</strong><br /><span>with Foodee specials</span></div></div>
+      <button class="btn btn-primary" type="submit"><img src="assets/icons/shopping-bag.png" alt="" />Place Order</button>
+      <p class="safe-note"><img src="assets/icons/shield-check.png" alt="" />Safe & Secure Checkout</p>
+    </aside>
+  </form>
+  <section class="service-strip shell" aria-label="Foodee benefits">
+  <article><img src="assets/icons/delivery-fast.png" alt="" /><div><h3>Fast Delivery</h3><p>Quick delivery right to your doorstep.</p></div></article>
+  <article><img src="assets/icons/fresh-leaf.png" alt="" /><div><h3>Fresh Ingredients</h3><p>Prepared with fresh, quality ingredients.</p></div></article>
+  <article><img src="assets/icons/safe-secure.png" alt="" /><div><h3>Safe & Secure</h3><p>Clean packaging you can trust.</p></div></article>
+  <article><img src="assets/icons/support-247.png" alt="" /><div><h3>24/7 Support</h3><p>We are here to help anytime.</p></div></article>
+</section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+</html>

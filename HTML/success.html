@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Order Success - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/success.css" />
+</head>
+<body data-page="success">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main class="success-page">
+  <section class="success-hero shell">
+    <div class="success-icon"><img src="assets/icons/success-check.png" alt="Success" /></div>
+    <h1>Order Placed <span class="underlined-word">Successfully</span></h1>
+    <p>Thank you for your order. We are preparing your food and will deliver it soon.</p>
+  </section>
+
+  <section class="order-info-card shell">
+    <article><img src="assets/icons/receipt-check.png" alt="" /><p>Order ID</p><strong id="successOrderCode">FD12345678</strong></article>
+    <article><img src="assets/icons/calendar.png" alt="" /><p>Date</p><strong id="successDate">Today</strong></article>
+    <article><img src="assets/payments/card.png" alt="" /><p>Total Amount</p><strong id="successTotal">BDT 548</strong></article>
+    <article><img src="assets/payments/card.png" alt="" /><p>Payment Method</p><strong id="successMethod">bKash</strong></article>
+    <article><img src="assets/icons/receipt-check.png" alt="" /><p>Payment Status</p><strong id="successStatus">Paid</strong></article>
+  </section>
+
+  <section class="tracking-card shell">
+    <h2>Order Tracking</h2>
+    <div class="track-steps">
+      <article class="track-step active"><div class="track-icon"><img src="assets/icons/shopping-bag.png" alt="" /></div><span>1</span><h3>Order Placed</h3><p>Your order has been placed successfully.</p></article>
+      <article class="track-step"><div class="track-icon"><img src="assets/icons/hot-pot.png" alt="" /></div><span>2</span><h3>Preparing</h3><p>We are preparing your food.</p></article>
+      <article class="track-step"><div class="track-icon"><img src="assets/icons/delivery-scooter.png" alt="" /></div><span>3</span><h3>On the Way</h3><p>Your order is on the way.</p></article>
+      <article class="track-step"><div class="track-icon"><img src="assets/icons/home-check.png" alt="" /></div><span>4</span><h3>Delivered</h3><p>Your order has been delivered.</p></article>
+    </div>
+  </section>
+
+  <section class="estimated-card">
+    <img src="assets/icons/clock.png" alt="" />
+    <div><h2>Estimated Delivery</h2><strong>01:20 PM - 01:35 PM</strong><p>Your food will be delivered soon.</p></div>
+  </section>
+  <div class="success-actions"><a class="btn btn-primary" href="html/contact.html"><img src="assets/icons/location-pin.png" alt="" />Track Order</a><a class="btn btn-outline" href="index.html"><img src="assets/icons/home-check.png" alt="" />Back to Home</a></div>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/success.js"></script>
+</body>
+</html>

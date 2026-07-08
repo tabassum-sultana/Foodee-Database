@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Product Details - Foodee</title>
+  <meta name="description" content="Foodee delivers fresh meals in Bangladesh fast." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/product.css" />
+</head>
+<body data-page="product">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
+      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
+      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><a href="html/menu.html">Burgers</a><span>/</span><strong data-product-name>Cheese Burger</strong></nav>
+  <section class="product-detail">
+    <div>
+      <div class="gallery-card">
+        <div class="gallery-main"><img class="gallery-hero-img" data-product-image src="assets/food/combos/product-chicken-combo.png" alt="Foodee selected item" /></div>
+      </div>
+      
+<div class="gallery-thumbs">
+        <button class="thumb active" type="button"><img data-product-thumb src="assets/food/combos/product-chicken-combo.png" alt="Selected item" /></button>
+        <button class="thumb" type="button"><img src="assets/food/combos/home-burger-combo.png" alt="Burger combo" /></button>
+        <button class="thumb" type="button"><img src="assets/food/combos/menu-pizza-combo.png" alt="Pizza combo" /></button>
+        <button class="thumb" type="button"><img src="assets/food/combos/checkout-cake-combo.png" alt="Dessert combo" /></button>
+      </div>
+    </div>
+    <section class="product-info">
+      <h1 data-product-name>Cheese Burger</h1>
+      <div class="rating"><img src="assets/icons/star-filled.png" alt="" /><span data-product-rating>4.6</span><span data-product-reviews>(128 reviews)</span></div>
+      <div class="price-large" data-product-price>BDT 149</div>
+      <p data-product-desc>Juicy grilled patty with cheese, fresh lettuce, tomato, onion and our special sauce in a soft sesame bun.</p>
+
+      <div class="option-title">Choose a Size</div>
+      <div class="size-grid">
+        <button class="choice-card active" type="button">Regular<small>BDT 149</small></button>
+        <button class="choice-card" type="button">Large<small>BDT 199</small></button>
+        <button class="choice-card" type="button">XL<small>BDT 249</small></button>
+      </div>
+
+      <div class="option-title">Add-ons <span style="color: var(--muted); font-weight: 500;">(Optional)</span></div>
+      <div class="addon-grid">
+        <div class="addon-card"><div><strong>Extra Cheese</strong><br /><small>BDT 30</small></div><button type="button">+</button></div>
+        <div class="addon-card"><div><strong>Chicken Slice</strong><br /><small>BDT 40</small></div><button type="button">+</button></div>
+        <div class="addon-card"><div><strong>Jalapenos</strong><br /><small>BDT 20</small></div><button type="button">+</button></div>
+      </div>
+
+      <div class="option-title">Quantity</div>
+      <div class="product-actions">
+        <div class="qty-control"><button type="button">-</button><span>1</span><button type="button">+</button></div>
+        <button class="btn btn-primary" type="button" id="detailAddCart" data-add-cart="burger"><img src="assets/icons/cart.png" alt="" />Add to Cart</button>
+        <button class="btn btn-outline" type="button" id="detailWishlist" data-wishlist="burger" aria-pressed="false"><img src="assets/icons/heart.png" alt="" />Add to Wishlist</button>
+      </div>
+    </section>
+  </section>
+</main>
+<section class="service-strip shell" aria-label="Foodee benefits">
+  <article><img src="assets/icons/delivery-fast.png" alt="" /><div><h3>Fast Delivery</h3><p>Quick delivery right to your doorstep.</p></div></article>
+  <article><img src="assets/icons/fresh-leaf.png" alt="" /><div><h3>Fresh Ingredients</h3><p>Prepared with fresh, quality ingredients.</p></div></article>
+  <article><img src="assets/icons/safe-secure.png" alt="" /><div><h3>Safe & Secure</h3><p>Clean packaging you can trust.</p></div></article>
+  <article><img src="assets/icons/support-247.png" alt="" /><div><h3>24/7 Support</h3><p>We are here to help anytime.</p></div></article>
+</section>
+<section class="section shell">
+  <div class="section-head"><h2>You Might Also Like</h2><a href="html/menu.html">View All</a></div>
+  <div class="product-grid" id="relatedProducts"></div>
+</section>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/product.js"></script>
+</body>
+</html>
