@@ -17,6 +17,8 @@
   }
 
   .brand {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
     min-width: 0 !important;
   }
 
@@ -25,6 +27,8 @@
   }
 
   .header-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     justify-self: end !important;
     display: flex !important;
     align-items: center !important;
@@ -88,6 +92,8 @@
   }
 
   .mobile-menu-toggle {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
     border: 0 !important;
     background: var(--green) !important;
     box-shadow: 0 10px 22px rgba(34,149,31,.18) !important;
