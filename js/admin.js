@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
 
     return {
+      id: order.id,
       orderCode: order.orderCode,
       customer,
       items,

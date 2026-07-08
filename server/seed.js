@@ -4,6 +4,7 @@ const vm = require("vm");
 require("dotenv").config();
 
 const db = require("./db");
+const migrate = require("./migrate");
 
 function loadSiteData() {
   const dataPath = path.join(__dirname, "..", "js", "data.js");
@@ -15,6 +16,7 @@ function loadSiteData() {
 }
 
 async function seed() {
+  await migrate();
   const data = loadSiteData();
 
   for (const category of data.categories) {
