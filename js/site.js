@@ -12,6 +12,35 @@ function showToast(message) {
 }
 
 const wishlistKey = "foodee-wishlist";
+const customerKey = "foodee-customer";
+
+function readCustomer() {
+  try { return JSON.parse(localStorage.getItem(customerKey)); }
+  catch { return null; }
+}
+
+function saveCustomer(customer) {
+  const clean = {
+    name: customer.name.trim(),
+    phone: customer.phone.trim()
+  };
+  localStorage.setItem(customerKey, JSON.stringify(clean));
+  refreshCustomerUI();
+  return clean;
+}
+
+function clearCustomer() {
+  localStorage.removeItem(customerKey);
+  refreshCustomerUI();
+}
+
+function requireCustomerLogin() {
+  const customer = readCustomer();
+  if (customer?.name && customer?.phone) return customer;
+  openAuth(false);
+  showToast("Name and phone required before order");
+  return null;
+}
 
 function readWishlist() {
   try { return JSON.parse(localStorage.getItem(wishlistKey)) || []; }
@@ -115,36 +144,41 @@ function mountAuth() {
         <button class="close-modal" type="button" data-close-auth aria-label="Close">x</button>
         <div class="auth-panel" id="signInPanel">
           <img class="auth-logo" src="${asset("assets/brand/logo.png")}" alt="Foodee" />
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue ordering your favorite meals.</p>
+          <h2>Customer Login</h2>
+          <p>Enter your name and phone number before placing an order.</p>
           <form id="signInForm">
-            <label class="input-icon"><img src="${asset("assets/icons/mail.png")}" alt="" /><input type="text" placeholder="Email or phone number" required /></label>
-            <label class="input-icon"><img src="${asset("assets/icons/lock.png")}" alt="" /><input type="password" placeholder="Password" required /><img src="${asset("assets/icons/eye.png")}" alt="" /></label>
-            <a class="forgot-link" href="${page("contact.html")}">Forgot Password?</a>
-            <button class="btn btn-primary" type="submit"><img src="${asset("assets/icons/user.png")}" alt="" />Sign In</button>
+            <label class="input-icon"><img src="${asset("assets/icons/user.png")}" alt="" /><input id="loginName" type="text" placeholder="Full name" required /></label>
+            <label class="input-icon"><img src="${asset("assets/icons/phone-circle.png")}" alt="" /><input id="loginPhone" type="tel" placeholder="Phone number" required /></label>
+            <button class="btn btn-primary" type="submit"><img src="${asset("assets/icons/user.png")}" alt="" />Continue</button>
           </form>
-          <div class="divider"><span>or continue with</span></div>
-          <div class="social-auth"><button type="button">G Google</button><button type="button"><img src="${asset("assets/social/facebook.png")}" alt="" />Facebook</button><button type="button"><img src="${asset("assets/payments/apple.png")}" alt="" />Apple</button></div>
-          <p>Don't have an account? <button type="button" id="switchToSignUp">Create Account</button></p>
         </div>
         <div class="auth-panel hidden" id="signUpPanel">
           <img class="auth-logo" src="${asset("assets/brand/logo.png")}" alt="Foodee" />
-          <h2>Create Account</h2>
-          <p>Create an account and enjoy fast delivery from Foodee.</p>
+          <h2>Customer Login</h2>
+          <p>Use your name and phone number to continue.</p>
           <form id="signUpForm">
-            <label class="input-icon"><img src="${asset("assets/icons/user.png")}" alt="" /><input type="text" placeholder="Full Name" required /></label>
-            <label class="input-icon"><img src="${asset("assets/icons/mail.png")}" alt="" /><input type="text" placeholder="Email or phone number" required /></label>
-            <label class="input-icon"><img src="${asset("assets/icons/lock.png")}" alt="" /><input type="password" placeholder="Password" required /><img src="${asset("assets/icons/eye-off.png")}" alt="" /></label>
-            <label class="input-icon"><img src="${asset("assets/icons/lock.png")}" alt="" /><input type="password" placeholder="Confirm Password" required /><img src="${asset("assets/icons/eye.png")}" alt="" /></label>
-            <label class="check-label"><input type="checkbox" required /> I agree to the <span>Terms & Conditions</span> and <span>Privacy Policy</span></label>
-            <button class="btn btn-primary" type="submit">Create Account</button>
+            <label class="input-icon"><img src="${asset("assets/icons/user.png")}" alt="" /><input id="signupName" type="text" placeholder="Full name" required /></label>
+            <label class="input-icon"><img src="${asset("assets/icons/phone-circle.png")}" alt="" /><input id="signupPhone" type="tel" placeholder="Phone number" required /></label>
+            <button class="btn btn-primary" type="submit">Continue</button>
           </form>
-          <div class="divider"><span>or continue with</span></div>
-          <div class="social-auth"><button type="button">G Google</button><button type="button"><img src="${asset("assets/social/facebook.png")}" alt="" />Facebook</button><button type="button"><img src="${asset("assets/payments/apple.png")}" alt="" />Apple</button></div>
-          <p>Already have an account? <button type="button" id="switchToSignIn">Sign In</button></p>
         </div>
       </section>
     </div>`;
+}
+
+function refreshCustomerUI() {
+  const customer = readCustomer();
+  document.querySelectorAll("[data-open-auth]").forEach((button) => {
+    button.innerHTML = customer?.name
+      ? `<img src="${asset("assets/icons/user.png")}" alt="" />${customer.name.split(" ")[0]}`
+      : `<img src="${asset("assets/icons/user.png")}" alt="" />Login`;
+  });
+  document.querySelectorAll("[data-customer-name]").forEach((node) => {
+    node.textContent = customer?.name || "";
+  });
+  document.querySelectorAll("[data-customer-phone]").forEach((node) => {
+    node.textContent = customer?.phone || "";
+  });
 }
 
 function productCard(product) {
@@ -218,6 +252,7 @@ function initSite() {
   mountWishlistNav();
   FoodeeCart.updateCount();
   refreshWishlistButtons();
+  refreshCustomerUI();
   headerSearch();
 
   document.querySelectorAll("[data-open-auth]").forEach((button) => button.addEventListener("click", () => openAuth(false)));
@@ -238,8 +273,26 @@ function initSite() {
   });
   document.querySelector("#switchToSignUp")?.addEventListener("click", () => openAuth(true));
   document.querySelector("#switchToSignIn")?.addEventListener("click", () => openAuth(false));
-  document.querySelector("#signInForm")?.addEventListener("submit", (event) => { event.preventDefault(); closeAuth(); showToast("Signed in successfully"); });
-  document.querySelector("#signUpForm")?.addEventListener("submit", (event) => { event.preventDefault(); closeAuth(); showToast("Account created"); });
+  document.querySelector("#signInForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveCustomer({
+      name: document.querySelector("#loginName").value,
+      phone: document.querySelector("#loginPhone").value
+    });
+    closeAuth();
+    showToast("Customer logged in");
+    window.dispatchEvent(new CustomEvent("foodee:customer-login"));
+  });
+  document.querySelector("#signUpForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveCustomer({
+      name: document.querySelector("#signupName").value,
+      phone: document.querySelector("#signupPhone").value
+    });
+    closeAuth();
+    showToast("Customer logged in");
+    window.dispatchEvent(new CustomEvent("foodee:customer-login"));
+  });
 }
 
 document.addEventListener("DOMContentLoaded", initSite);
