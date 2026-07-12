@@ -5,12 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const activityList = document.querySelector("#activityList");
   const wishlistList = document.querySelector("#wishlistList");
   const contactList = document.querySelector("#contactList");
+  const customerList = document.querySelector("#customerList");
   const productList = document.querySelector("#productList");
   const search = document.querySelector("#adminSearch");
   const refresh = document.querySelector("#refreshAdmin");
   const clearAdmin = document.querySelector("#clearAdmin");
   let orders = [];
   let contacts = [];
+  let customers = [];
   let events = [];
   let query = "";
 
@@ -78,6 +80,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#statPending").textContent = pending;
     document.querySelector("#statWishlist").textContent = wishlistCount;
     document.querySelector("#statContacts").textContent = contacts.length;
+  }
+
+  function renderDatabaseStatus(status) {
+    const card = document.querySelector("#dbStatusCard");
+    const value = document.querySelector("#statDatabase");
+    if (!card || !value) return;
+    card.classList.toggle("connected", Boolean(status?.ok));
+    card.classList.toggle("disconnected", !status?.ok);
+    value.textContent = status?.ok ? "Connected" : "Offline";
+    card.title = status?.ok ? `Connected to ${status.dbName || "database"}` : (status?.message || "Database connection unavailable");
   }
 
   function readWishlist() {
@@ -302,6 +314,16 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("") : `<div class="empty-admin">No contact messages yet.</div>`;
   }
 
+  function renderCustomers() {
+    if (!customerList) return;
+    customerList.innerHTML = customers.length ? customers.map((customer) => `
+      <article class="customer-entry">
+        <strong>${customer.name}</strong>
+        <p>${customer.phone} | Orders ${customer.totalOrders || 0} | Spent ${FoodeeCart.money(customer.totalSpent || 0)}</p>
+      </article>
+    `).join("") : `<div class="empty-admin">No database customers yet.</div>`;
+  }
+
   function renderProducts() {
     if (!productList) return;
     productList.innerHTML = FoodeeData.products.length ? FoodeeData.products.map((product) => `
@@ -337,7 +359,13 @@ document.addEventListener("DOMContentLoaded", () => {
   async function load() {
     let apiOrders = [];
     let apiContacts = [];
+    let apiCustomers = [];
     let apiEvents = [];
+    try {
+      renderDatabaseStatus(await FoodeeAPI.getHealth());
+    } catch (error) {
+      renderDatabaseStatus({ ok: false, message: error.message });
+    }
     try {
       await FoodeeAPI.loadProducts();
     } catch {
@@ -354,18 +382,25 @@ document.addEventListener("DOMContentLoaded", () => {
       apiContacts = [];
     }
     try {
+      apiCustomers = await FoodeeAPI.getCustomers();
+    } catch {
+      apiCustomers = [];
+    }
+    try {
       apiEvents = await FoodeeAPI.getCartEvents();
     } catch {
       apiEvents = [];
     }
     orders = mergeOrders(apiOrders);
     contacts = mergeContacts(apiContacts);
+    customers = apiCustomers;
     events = apiEvents;
     renderOrders();
     renderCart();
     renderActivity();
     renderWishlist();
     renderContacts();
+    renderCustomers();
     renderProducts();
   }
 

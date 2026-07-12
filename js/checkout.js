@@ -5,6 +5,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const discount = document.querySelector("#checkoutDiscount");
   const total = document.querySelector("#checkoutTotal");
   const form = document.querySelector("#checkoutForm");
+  const loginBox = document.querySelector("#checkoutLoginBox");
+
+  function applyCustomer() {
+    const customer = readCustomer();
+    loginBox?.classList.toggle("logged-in", Boolean(customer?.name && customer?.phone));
+    if (!customer) return;
+    const nameInput = form?.querySelector("#fullName");
+    const phoneInput = form?.querySelector("#phone");
+    if (nameInput && !nameInput.value.trim()) nameInput.value = customer.name;
+    if (phoneInput && !phoneInput.value.trim()) phoneInput.value = customer.phone;
+    if (loginBox) {
+      loginBox.querySelector("strong").textContent = `Logged in: ${customer.name}`;
+      loginBox.querySelector("p").textContent = `Phone: ${customer.phone}`;
+      loginBox.querySelector("button").textContent = "Change";
+    }
+  }
 
   function render() {
     const items = FoodeeCart.items();
@@ -40,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
+    const loggedCustomer = requireCustomerLogin();
+    if (!loggedCustomer) return;
     const activePayment = document.querySelector(".payment-option.active h3")?.textContent || "bKash";
     const totals = FoodeeCart.totals();
     const cartItems = FoodeeCart.items().map(({ product, qty, unitPrice, optionSummary, displayName, sizeName, addOns }) => ({
@@ -61,8 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const payload = {
       sessionId: FoodeeCart.sessionId(),
       customer: {
-        name: form.querySelector("#fullName").value.trim(),
-        phone: form.querySelector("#phone").value.trim(),
+        id: loggedCustomer.id || null,
+        name: loggedCustomer.name,
+        phone: loggedCustomer.phone,
         address: form.querySelector("#address").value.trim(),
         note: form.querySelector("#note").value.trim()
       },
@@ -96,4 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   render();
+  applyCustomer();
+  window.addEventListener("foodee:customer-login", applyCustomer);
 });

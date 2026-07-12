@@ -17,6 +17,13 @@ const FoodeeAPI = (() => {
     });
   }
 
+  function loginCustomer(payload) {
+    return request("/api/customers/login", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  }
+
   function getContacts() {
     return request("/api/contacts");
   }
@@ -45,6 +52,27 @@ const FoodeeAPI = (() => {
 
   function getAdminSummary() {
     return request("/api/admin/summary");
+  }
+
+  function getHealth() {
+    return request("/api/health");
+  }
+
+  function getCustomers() {
+    return request("/api/customers");
+  }
+
+  function updateCustomer(id, payload) {
+    return request(`/api/customers/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload)
+    });
+  }
+
+  function removeCustomer(id) {
+    return request(`/api/customers/${encodeURIComponent(id)}`, {
+      method: "DELETE"
+    });
   }
 
   function getCategories() {
@@ -89,5 +117,5 @@ const FoodeeAPI = (() => {
     }));
   }
 
-  return { createOrder, getAdminSummary, getCartEvents, getCategories, getContacts, getOrders, loadProducts, removeProduct, saveCartEvent, saveContact, saveProduct, updateOrderStatus, updateProduct };
+  return { createOrder, getAdminSummary, getCartEvents, getCategories, getContacts, getCustomers, getHealth, getOrders, loadProducts, loginCustomer, removeCustomer, removeProduct, saveCartEvent, saveContact, saveProduct, updateCustomer, updateOrderStatus, updateProduct };
 })();

@@ -65,10 +65,21 @@ async function migrate() {
   `);
 
   await db.query(`
+    CREATE TABLE IF NOT EXISTS customers (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      full_name VARCHAR(120) NOT NULL,
+      phone VARCHAR(40) NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
     CREATE TABLE IF NOT EXISTS orders (
       id INT AUTO_INCREMENT PRIMARY KEY,
       order_code VARCHAR(24) NOT NULL UNIQUE,
       session_id VARCHAR(80),
+      customer_id INT,
       customer_name VARCHAR(120) NOT NULL,
       phone VARCHAR(40) NOT NULL,
       address TEXT NOT NULL,
@@ -119,6 +130,7 @@ async function migrate() {
 
   if (await tableExists("orders")) {
     await addColumn("orders", "session_id", "VARCHAR(80) NULL AFTER order_code");
+    await addColumn("orders", "customer_id", "INT NULL AFTER session_id");
   }
 
   if (await tableExists("order_items")) {

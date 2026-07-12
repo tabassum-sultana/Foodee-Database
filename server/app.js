@@ -31,9 +31,9 @@ async function categoryIdByName(name, icon = "assets/icons/menu-list.png") {
 app.get("/api/health", asyncRoute(async (_req, res) => {
   try {
     await db.query("SELECT 1");
-    res.json({ ok: true, database: "connected" });
+    res.json({ ok: true, database: "connected", dbName: db.dbName });
   } catch (error) {
-    res.status(500).json({ ok: false, database: "disconnected", message: error.message });
+    res.status(500).json({ ok: false, database: "disconnected", dbName: db.dbName, message: error.message });
   }
 }));
 
@@ -147,6 +147,71 @@ app.get("/api/contacts", asyncRoute(async (_req, res) => {
   res.json(rows);
 }));
 
+app.post("/api/customers/login", asyncRoute(async (req, res) => {
+  const { name, phone } = req.body;
+  if (!name || !phone) {
+    return res.status(400).json({ message: "Name and phone are required." });
+  }
+
+  await db.query(
+    `INSERT INTO customers (full_name, phone)
+     VALUES (:name, :phone)
+     ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), updated_at = CURRENT_TIMESTAMP`,
+    { name: name.trim(), phone: phone.trim() }
+  );
+  const [[customer]] = await db.query(
+    "SELECT id, full_name AS name, phone FROM customers WHERE phone = :phone",
+    { phone: phone.trim() }
+  );
+  res.json(customer);
+}));
+
+app.get("/api/customers", asyncRoute(async (_req, res) => {
+  const [rows] = await db.query(`
+    SELECT c.id, c.full_name AS name, c.phone, c.created_at AS createdAt, c.updated_at AS updatedAt,
+      COUNT(o.id) AS totalOrders,
+      COALESCE(SUM(o.total), 0) AS totalSpent
+    FROM customers c
+    LEFT JOIN orders o ON o.customer_id = c.id
+    GROUP BY c.id
+    ORDER BY c.updated_at DESC
+  `);
+  res.json(rows.map((row) => ({
+    ...row,
+    totalOrders: Number(row.totalOrders),
+    totalSpent: Number(row.totalSpent)
+  })));
+}));
+
+app.patch("/api/customers/:id", asyncRoute(async (req, res) => {
+  const { name, phone } = req.body;
+  if (!name && !phone) return res.status(400).json({ message: "Provide name or phone." });
+
+  const fields = [];
+  const params = { id: req.params.id };
+  if (name) {
+    fields.push("full_name = :name");
+    params.name = name.trim();
+  }
+  if (phone) {
+    fields.push("phone = :phone");
+    params.phone = phone.trim();
+  }
+  const [result] = await db.query(`UPDATE customers SET ${fields.join(", ")} WHERE id = :id`, params);
+  if (!result.affectedRows) return res.status(404).json({ message: "Customer not found." });
+  res.json({ message: "Customer updated successfully." });
+}));
+
+app.delete("/api/customers/:id", asyncRoute(async (req, res) => {
+  const [[orders]] = await db.query("SELECT COUNT(*) AS count FROM orders WHERE customer_id = :id", { id: req.params.id });
+  if (Number(orders.count) > 0) {
+    return res.status(409).json({ message: "Customer has orders and cannot be deleted." });
+  }
+  const [result] = await db.query("DELETE FROM customers WHERE id = :id", { id: req.params.id });
+  if (!result.affectedRows) return res.status(404).json({ message: "Customer not found." });
+  res.json({ message: "Customer deleted successfully." });
+}));
+
 app.post("/api/orders", asyncRoute(async (req, res) => {
   const { sessionId, customer, paymentMethod, totals, items } = req.body;
   if (!customer?.name || !customer?.phone || !customer?.address || !paymentMethod || !items?.length) {
@@ -158,9 +223,29 @@ app.post("/api/orders", asyncRoute(async (req, res) => {
 
   try {
     await connection.beginTransaction();
+    let customerId = null;
+    const [[savedCustomer]] = await connection.query(
+      "SELECT id FROM customers WHERE phone = :phone",
+      { phone: customer.phone }
+    );
+    if (savedCustomer) {
+      customerId = savedCustomer.id;
+      await connection.query(
+        "UPDATE customers SET full_name = :name WHERE id = :id",
+        { id: customerId, name: customer.name }
+      );
+    } else {
+      const [customerResult] = await connection.query(
+        "INSERT INTO customers (full_name, phone) VALUES (:name, :phone)",
+        { name: customer.name, phone: customer.phone }
+      );
+      customerId = customerResult.insertId;
+    }
+
     const orderParams = {
       orderCode,
       sessionId: sessionId || null,
+      customerId,
       name: customer.name,
       phone: customer.phone,
       address: customer.address,
@@ -174,9 +259,9 @@ app.post("/api/orders", asyncRoute(async (req, res) => {
     };
     const [orderResult] = await connection.query(
       `INSERT INTO orders
-        (order_code, session_id, customer_name, phone, address, note, payment_method, payment_status, subtotal, delivery_fee, discount, total)
+        (order_code, session_id, customer_id, customer_name, phone, address, note, payment_method, payment_status, subtotal, delivery_fee, discount, total)
        VALUES
-        (:orderCode, :sessionId, :name, :phone, :address, :note, :paymentMethod, :paymentStatus, :subtotal, :delivery, :discount, :total)`,
+        (:orderCode, :sessionId, :customerId, :name, :phone, :address, :note, :paymentMethod, :paymentStatus, :subtotal, :delivery, :discount, :total)`,
       orderParams
     );
 
@@ -222,7 +307,7 @@ app.post("/api/orders", asyncRoute(async (req, res) => {
 
 app.get("/api/orders", asyncRoute(async (_req, res) => {
   const [orders] = await db.query(`
-    SELECT id, order_code AS orderCode, session_id AS sessionId, customer_name AS customerName, phone, address, note,
+    SELECT id, order_code AS orderCode, session_id AS sessionId, customer_id AS customerId, customer_name AS customerName, phone, address, note,
       payment_method AS paymentMethod, payment_status AS paymentStatus, order_status AS orderStatus,
       subtotal, delivery_fee AS deliveryFee, discount, total, created_at AS createdAt
     FROM orders

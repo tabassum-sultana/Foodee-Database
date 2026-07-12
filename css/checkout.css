@@ -103,6 +103,34 @@
   height: 126px;
 }
 
+.checkout-login-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding: 16px 18px;
+  border: 1px solid rgba(34,149,31,.38);
+  border-radius: 14px;
+  background: var(--green-soft);
+}
+
+.checkout-login-box strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--green-dark);
+}
+
+.checkout-login-box p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.checkout-login-box.logged-in {
+  background: #fff;
+}
+
 
 /* Tablet */
 @media (max-width: 920px) {

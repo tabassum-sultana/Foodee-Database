@@ -21,6 +21,7 @@ function readCustomer() {
 
 function saveCustomer(customer) {
   const clean = {
+    id: customer.id || customer.customerId || null,
     name: customer.name.trim(),
     phone: customer.phone.trim()
   };
@@ -132,7 +133,7 @@ function mountFooter() {
         </div>
       </div>
     </div>
-    <div class="footer-bottom"><div class="footer-bottom-inner"><p>&copy; 2025 Foodee. All rights reserved.</p></div></div>`;
+    <div class="footer-bottom"><div class="footer-bottom-inner"><p>&copy; 2026 Foodee. All rights reserved.</p></div></div>`;
 }
 
 function mountAuth() {
@@ -273,26 +274,28 @@ function initSite() {
   });
   document.querySelector("#switchToSignUp")?.addEventListener("click", () => openAuth(true));
   document.querySelector("#switchToSignIn")?.addEventListener("click", () => openAuth(false));
-  document.querySelector("#signInForm")?.addEventListener("submit", (event) => {
+  async function handleCustomerLogin(event, nameSelector, phoneSelector) {
     event.preventDefault();
-    saveCustomer({
-      name: document.querySelector("#loginName").value,
-      phone: document.querySelector("#loginPhone").value
-    });
+    const localCustomer = {
+      name: document.querySelector(nameSelector).value,
+      phone: document.querySelector(phoneSelector).value
+    };
+    let customer = localCustomer;
+    try {
+      if (window.FoodeeAPI?.loginCustomer) {
+        customer = await window.FoodeeAPI.loginCustomer(localCustomer);
+      }
+    } catch {
+      showToast("Saved locally. Backend login unavailable");
+    }
+    saveCustomer(customer);
     closeAuth();
     showToast("Customer logged in");
     window.dispatchEvent(new CustomEvent("foodee:customer-login"));
-  });
-  document.querySelector("#signUpForm")?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    saveCustomer({
-      name: document.querySelector("#signupName").value,
-      phone: document.querySelector("#signupPhone").value
-    });
-    closeAuth();
-    showToast("Customer logged in");
-    window.dispatchEvent(new CustomEvent("foodee:customer-login"));
-  });
+  }
+
+  document.querySelector("#signInForm")?.addEventListener("submit", (event) => handleCustomerLogin(event, "#loginName", "#loginPhone"));
+  document.querySelector("#signUpForm")?.addEventListener("submit", (event) => handleCustomerLogin(event, "#signupName", "#signupPhone"));
 }
 
 document.addEventListener("DOMContentLoaded", initSite);
