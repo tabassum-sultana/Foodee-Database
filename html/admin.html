@@ -53,6 +53,73 @@
     <article><span>Messages</span><strong id="statContacts">0</strong></article>
   </section>
 
+  <section class="admin-panel admin-tables shell">
+    <div class="panel-head">
+      <div>
+        <h2>Database Tables</h2>
+        <p>University view of saved customers, cart activity, and order bill details.</p>
+      </div>
+      <span class="table-note">Data saves in MySQL when local server is running.</span>
+    </div>
+
+    <div class="table-block">
+      <h3>Orders Table</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Food Items</th>
+              <th>Payment</th>
+              <th>Total Bill</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="table-block">
+      <h3>Add To Cart Table</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Customer / Session</th>
+              <th>Action</th>
+              <th>Food</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Cart Total</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="cartTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="table-block">
+      <h3>Customers Table</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Total Orders</th>
+              <th>Total Spent</th>
+            </tr>
+          </thead>
+          <tbody id="customersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <section class="admin-layout shell">
     <section class="admin-panel order-board">
       <div class="panel-head">

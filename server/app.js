@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const db = require("./db");
 const migrate = require("./migrate");
+const seed = require("./seed");
 
 const app = express();
 const rootDir = path.join(__dirname, "..");
@@ -429,9 +430,30 @@ app.get("/api/admin/summary", asyncRoute(async (_req, res) => {
   });
 }));
 
+app.get("/api/database/tables", asyncRoute(async (_req, res) => {
+  const tables = ["categories", "products", "customers", "orders", "order_items", "contacts", "cart_events"];
+  const result = {};
+  for (const table of tables) {
+    const [[row]] = await db.query(`SELECT COUNT(*) AS count FROM ${table}`);
+    result[table] = Number(row.count || 0);
+  }
+  res.json({
+    ok: true,
+    database: db.dbName,
+    tables: result
+  });
+}));
+
 app.use("/api", (_req, res) => {
   res.status(404).json({ message: "API route not found." });
 });
+
+app.get("/menu", (_req, res) => res.sendFile(path.join(rootDir, "html", "menu.html")));
+app.get("/about", (_req, res) => res.sendFile(path.join(rootDir, "html", "about.html")));
+app.get("/contact", (_req, res) => res.sendFile(path.join(rootDir, "html", "contact.html")));
+app.get("/cart", (_req, res) => res.sendFile(path.join(rootDir, "html", "cart.html")));
+app.get("/checkout", (_req, res) => res.sendFile(path.join(rootDir, "html", "checkout.html")));
+app.get("/admin", (_req, res) => res.sendFile(path.join(rootDir, "html", "admin.html")));
 
 app.get("*", (_req, res) => {
   res.sendFile(path.join(rootDir, "index.html"));
@@ -442,11 +464,18 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ message: "Server error.", detail: error.message });
 });
 
-migrate().then(() => {
+async function startServer() {
+  await migrate();
+  const setup = await seed({ runMigrate: false, silent: true });
+  console.log(`Database ready: ${setup.categories} categories, ${setup.products} products.`);
   app.listen(port, () => {
     console.log(`Foodee server running at http://localhost:${port}`);
+    console.log(`Admin tables: http://localhost:${port}/html/admin.html`);
+    console.log(`Database check: http://localhost:${port}/api/database/tables`);
   });
-}).catch((error) => {
+}
+
+startServer().catch((error) => {
   console.error("Could not start server:", error.message);
   process.exit(1);
 });

@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactList = document.querySelector("#contactList");
   const customerList = document.querySelector("#customerList");
   const productList = document.querySelector("#productList");
+  const ordersTableBody = document.querySelector("#ordersTableBody");
+  const cartTableBody = document.querySelector("#cartTableBody");
+  const customersTableBody = document.querySelector("#customersTableBody");
   const search = document.querySelector("#adminSearch");
   const refresh = document.querySelector("#refreshAdmin");
   const clearAdmin = document.querySelector("#clearAdmin");
@@ -338,6 +341,55 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("") : `<div class="empty-admin">No products found.</div>`;
   }
 
+  function emptyTableRow(message, columns) {
+    return `<tr><td class="muted-cell" colspan="${columns}">${message}</td></tr>`;
+  }
+
+  function renderDataTables() {
+    if (ordersTableBody) {
+      ordersTableBody.innerHTML = orders.length ? orders.map((order) => `
+        <tr>
+          <td><strong>${order.orderCode || order.id || "N/A"}</strong></td>
+          <td>${order.customer?.name || "Guest customer"}</td>
+          <td>${order.customer?.phone || "Not given"}</td>
+          <td>${order.items.length ? order.items.map((item) => `${item.name} x${item.qty}`).join("<br>") : "No items"}</td>
+          <td>${order.method}<br><span class="muted-cell">${order.status}</span></td>
+          <td><strong>${FoodeeCart.money(order.total)}</strong><br><span class="muted-cell">Subtotal ${FoodeeCart.money(order.subtotal)}</span></td>
+          <td>${date(order.createdAt)}</td>
+        </tr>
+      `).join("") : emptyTableRow("No orders saved yet. Place an order from checkout to see it here.", 7);
+    }
+
+    if (cartTableBody) {
+      const activity = mergeEvents(events);
+      cartTableBody.innerHTML = activity.length ? activity.slice(0, 50).map((entry) => {
+        const customer = customerForSession(entry.sessionId);
+        return `
+          <tr>
+            <td>${customer?.name || "Session customer"}<br><span class="muted-cell">${entry.sessionId || "No session"}</span></td>
+            <td>${entry.action || "Added to cart"}</td>
+            <td>${entry.productName || "Unknown food"}${entry.optionSummary ? `<br><span class="muted-cell">${entry.optionSummary}</span>` : ""}</td>
+            <td>${entry.qty || 1}</td>
+            <td>${FoodeeCart.money(entry.unitPrice || 0)}</td>
+            <td>${FoodeeCart.money(entry.cartTotal || 0)}</td>
+            <td>${date(entry.createdAt)}</td>
+          </tr>
+        `;
+      }).join("") : emptyTableRow("No add-to-cart activity yet. Add food from menu to see it here.", 7);
+    }
+
+    if (customersTableBody) {
+      customersTableBody.innerHTML = customers.length ? customers.map((customer) => `
+        <tr>
+          <td><strong>${customer.name || "Customer"}</strong></td>
+          <td>${customer.phone || "Not given"}</td>
+          <td>${customer.totalOrders || 0}</td>
+          <td>${FoodeeCart.money(customer.totalSpent || 0)}</td>
+        </tr>
+      `).join("") : emptyTableRow("No database customers yet. Customer login/order will create records.", 4);
+    }
+  }
+
   function mergeContacts(apiContacts = []) {
     const map = new Map();
     [...readLocalContacts(), ...apiContacts].forEach((contact) => {
@@ -402,6 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderContacts();
     renderCustomers();
     renderProducts();
+    renderDataTables();
   }
 
   search?.addEventListener("input", () => {

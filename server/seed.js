@@ -15,8 +15,9 @@ function loadSiteData() {
   return sandbox.window.FoodeeData;
 }
 
-async function seed() {
-  await migrate();
+async function seed(options = {}) {
+  const { runMigrate = true, closePool = false, silent = false } = options;
+  if (runMigrate) await migrate();
   const data = loadSiteData();
 
   for (const category of data.categories) {
@@ -55,12 +56,20 @@ async function seed() {
     );
   }
 
-  console.log(`Seeded ${data.categories.length} categories and ${data.products.length} products.`);
-  await db.end();
+  if (!silent) console.log(`Seeded ${data.categories.length} categories and ${data.products.length} products.`);
+  if (closePool) await db.end();
+  return {
+    categories: data.categories.length,
+    products: data.products.length
+  };
 }
 
-seed().catch(async (error) => {
-  console.error(error.message);
-  await db.end();
-  process.exit(1);
-});
+if (require.main === module) {
+  seed({ closePool: true }).catch(async (error) => {
+    console.error(error.message);
+    await db.end();
+    process.exit(1);
+  });
+}
+
+module.exports = seed;
