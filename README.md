@@ -1,14 +1,15 @@
 # Foodee - Food Ordering Website
 
-Foodee is a university project for an online food ordering system. The project has a customer-facing website, an admin panel, a Node.js backend, and a MySQL database.
+Foodee is an online food ordering system with a customer-facing website, an admin panel, a Node.js backend, and a MySQL database.
 
 ## Project Features
 
 - Customer can browse menu items
 - Customer can add food to cart
-- Customer can login with name and phone number before order
+- Customer can login or register with name, phone number, and email
 - Customer can place an order and see confirmation
-- Admin can see orders, customers, cart activity, contact messages, products, and revenue
+- Admin has a separate login and organized dashboard
+- Admin can manage orders, customers, food items, analytics, and messages
 - Menu data is stored in MySQL database
 
 ## Technology Used
@@ -46,14 +47,33 @@ Main tables:
 ```text
 categories    Food categories
 products      Menu products
-customers     Customer name and phone
+customers     Customer name, phone, and email
+admin_users   Admin login account
 orders        Order and bill information
 order_items   Ordered food details
 contacts      Contact form messages
 cart_events   Add-to-cart activity
 ```
 
-## How To Run
+## Easy Way To Run
+
+1. Start MySQL Server 8.0.
+2. Double-click `start-foodee-server.bat`.
+3. Keep the black server window open.
+4. The customer website opens automatically at `http://127.0.0.1:5600/`.
+
+## Admin Login
+
+Open the normal Login window on the website and choose **Admin Login**.
+
+```text
+Username: admin
+Password: admin123
+```
+
+The admin dashboard includes Dashboard, Customer Orders, Customers, Menu Management, Analytics, Messages, and Database Tables.
+
+## Command Line Way
 
 1. Start MySQL Server 8.0.
 2. Create a `.env` file using `.env.example`.
@@ -87,7 +107,7 @@ Website link:
 http://127.0.0.1:5600
 ```
 
-Admin page:
+Direct admin page (redirects to Admin Login when logged out):
 
 ```text
 http://127.0.0.1:5600/html/admin.html

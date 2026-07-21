@@ -592,6 +592,29 @@ main { min-height: 60vh; }
 .auth-dialog::before { content:""; position:absolute; right:22px; top:18px; width:82px; height:82px; background:url("../assets/decor/outline-leaf.png") center/contain no-repeat; opacity:.16; }
 .auth-dialog::after { content:""; position:absolute; left:18px; bottom:16px; width:74px; height:74px; background:url("../assets/decor/outline-leaf.png") center/contain no-repeat; opacity:.12; transform:rotate(180deg); }
 .close-modal { position: absolute; right: 12px; top: 8px; z-index: 2; width: 34px; height: 34px; border: 0; background: transparent; color: var(--muted); font-size: 26px; }
+.auth-mode-tabs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 28px 18px 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #f7f9f6;
+}
+.auth-mode-tabs button {
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.auth-mode-tabs button.active { color: #fff; background: var(--green); }
 .auth-panel { position: relative; z-index: 1; text-align: center; }
 .auth-logo { width: 150px; margin: 0 auto 10px; }
 .auth-panel h2 { margin: 0 0 8px; font-size: 28px; line-height: 1.12; }
@@ -611,6 +634,33 @@ main { min-height: 60vh; }
 .social-auth { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
 .social-auth button { height: 44px; border: 1px solid var(--line); border-radius: 10px; background:#fff; display:flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size: 13px; }
 .social-auth img { width: 18px; height: 18px; object-fit: contain; }
+.account-overview {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--green-wash);
+  text-align: left;
+}
+.account-avatar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+}
+.account-overview strong,
+.account-overview span { display: block; }
+.account-overview strong { margin-bottom: 5px; font-size: 17px; }
+.account-overview span { margin-top: 3px; color: var(--muted); font-size: 13px; }
+.account-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .hidden { display: none !important; }
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 250; opacity: 0; pointer-events: none; transform: translate(-50%, 14px); transition: .2s ease; padding: 13px 18px; border-radius: 999px; color: #fff; background: var(--green); font-weight: 800; box-shadow: var(--shadow); }
 .toast.show { opacity: 1; transform: translate(-50%,0); }

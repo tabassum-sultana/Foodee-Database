@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Foodee Project Demo</title>
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/demo.css" />
+  <link rel="stylesheet" href="css/mobile.css" />
+</head>
+<body data-page="demo">
+  <main class="demo-shell">
+    <section class="demo-hero">
+      <div>
+        <p class="eyebrow"><img src="assets/icons/receipt-check.png" alt="" />System overview</p>
+        <h1>Foodee Project Demo</h1>
+        <p>Ei page diye sir-ke ek sathe website, backend, database connection, and created tables dekhate parben.</p>
+      </div>
+      <strong class="demo-status" id="dbStatus">Checking database...</strong>
+    </section>
+
+    <section class="demo-actions">
+      <a class="demo-action primary" href="index.html">
+        <span>1</span>
+        <strong>Open Website</strong>
+        <small>Customer menu, login, cart, checkout</small>
+      </a>
+      <a class="demo-action" href="index.html?admin=1">
+        <span>2</span>
+        <strong>Admin Login</strong>
+        <small>Orders, customers, cart activity</small>
+      </a>
+      <a class="demo-action" href="html/database.html">
+        <span>3</span>
+        <strong>Show Database Tables</strong>
+        <small>Tables created and data count</small>
+      </a>
+    </section>
+
+    <section class="demo-panel">
+      <div class="demo-panel-head">
+        <div>
+          <h2>Database Tables Created</h2>
+          <p>Server start korlei backend ei tables create/check kore.</p>
+        </div>
+        <button class="btn btn-outline" type="button" id="refreshDemo">Refresh</button>
+      </div>
+      <div class="demo-table-grid" id="demoTableCards"></div>
+    </section>
+
+    <section class="demo-panel">
+      <div class="demo-panel-head">
+        <div>
+          <h2>Sir Question Answer</h2>
+          <p>Presentation-e short explanation.</p>
+        </div>
+      </div>
+      <div class="answer-box">
+        <p><b>Database connected?</b> Yes, Node.js backend connects to MySQL database named <code>foodee_db</code>.</p>
+        <p><b>Tables created?</b> Yes, server automatically creates customer, order, cart, wishlist/activity, admin, and product tables.</p>
+        <p><b>Data save hoy kothay?</b> Customer login saves in <code>customers</code>, add-to-cart/wishlist saves in <code>cart_events</code>, order saves in <code>orders</code> and <code>order_items</code>.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/demo.js"></script>
+</body>
+</html>

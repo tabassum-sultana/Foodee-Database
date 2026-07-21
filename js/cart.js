@@ -117,9 +117,13 @@ const FoodeeCart = (() => {
 
   function logActivity(action, id, qty, details = {}) {
     const found = product(id);
+    const customer = typeof readCustomer === "function" ? readCustomer() : null;
     const entry = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       sessionId: sessionId(),
+      customerId: customer?.id || null,
+      customerName: customer?.name || "",
+      phone: customer?.phone || "",
       action,
       productId: id,
       productName: details.productName || found?.name || id,

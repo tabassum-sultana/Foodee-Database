@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="../" />
+  <title>Database Tables - Foodee</title>
+  <meta name="description" content="Foodee database table view." />
+  <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/database.css" />
+  <link rel="stylesheet" href="css/mobile.css" />
+</head>
+<body data-page="database">
+<header class="site-header">
+  <div class="header-shell">
+    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="html/menu.html">Menu</a>
+      <a href="html/about.html">About</a>
+      <a href="html/contact.html">Contact</a>
+    </nav>
+    <div class="header-actions">
+      <a class="btn btn-outline" href="html/admin.html">Admin Panel</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="database-hero shell">
+    <div>
+      <p class="eyebrow"><img src="assets/icons/receipt-check.png" alt="" />Database records</p>
+      <h1>MySQL Tables</h1>
+      <p>Server run korlei backend database tables create/check kore. Ei page-e table count, saved order, add-to-cart activity, and customer records dekha jay.</p>
+    </div>
+    <div class="database-actions">
+      <span class="db-connected-pill" id="dbConnectedPill">Checking DB</span>
+      <button class="btn btn-outline" type="button" id="refreshTables">Refresh Tables</button>
+      <a class="btn btn-primary" href="html/menu.html"><img src="assets/icons/menu-list.png" alt="" />Test Order</a>
+    </div>
+  </section>
+
+  <section class="db-status-grid shell" id="tableCards"></section>
+
+  <section class="db-flow shell">
+    <article><span>1</span><strong>Customer Login</strong><p>Name and phone save in <b>customers</b>.</p></article>
+    <article><span>2</span><strong>Add To Cart</strong><p>Cart activity save in <b>cart_events</b>.</p></article>
+    <article><span>3</span><strong>Checkout</strong><p>Bill save in <b>orders</b> and food details in <b>order_items</b>.</p></article>
+  </section>
+
+  <section class="db-table-panel shell">
+    <div class="db-panel-head">
+      <div>
+        <h2>Orders Table</h2>
+        <p>Customer order and bill information from checkout.</p>
+      </div>
+      <code>orders + order_items</code>
+    </div>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Food Items</th>
+            <th>Payment</th>
+            <th>Total Bill</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="db-table-panel shell">
+    <div class="db-panel-head">
+      <div>
+        <h2>Add To Cart Table</h2>
+        <p>Recent add-to-cart and wishlist activity saved by backend.</p>
+      </div>
+      <code>cart_events</code>
+    </div>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Action</th>
+            <th>Food</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Cart Total</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="cartTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="db-table-panel shell">
+    <div class="db-panel-head">
+      <div>
+        <h2>Wishlist Table</h2>
+        <p>Customer wishlist save/remove activity with name, phone, and selected food.</p>
+      </div>
+      <code>cart_events / wishlist</code>
+    </div>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Action</th>
+            <th>Food</th>
+            <th>Category</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="wishlistTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="db-table-panel shell">
+    <div class="db-panel-head">
+      <div>
+        <h2>Customers Table</h2>
+        <p>Customer records created from login/order flow with full activity summary.</p>
+      </div>
+      <code>customers</code>
+    </div>
+    <div class="db-table-wrap">
+      <table class="db-table">
+        <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Total Orders</th>
+              <th>Total Spent</th>
+              <th>Cart Adds</th>
+              <th>Wishlist Adds</th>
+            </tr>
+        </thead>
+        <tbody id="customersTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer"></footer>
+<div id="authMount"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/database.js"></script>
+</body>
+</html>

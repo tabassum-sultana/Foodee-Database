@@ -4,207 +4,145 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <base href="../" />
-  <title>Admin Panel - Foodee</title>
-  <meta name="description" content="Foodee admin panel for orders and cart activity." />
+  <title>Admin Dashboard - Foodee</title>
+  <meta name="description" content="Foodee restaurant administration dashboard." />
   <link rel="icon" type="image/png" href="assets/brand/logo-mark.png" />
   <link rel="stylesheet" href="css/common.css" />
   <link rel="stylesheet" href="css/admin.css" />
-  <link rel="stylesheet" href="css/mobile.css" />
 </head>
-<body data-page="admin">
-<header class="site-header">
-  <div class="header-shell">
-    <a class="brand" href="index.html" aria-label="Foodee home"><img src="assets/brand/logo.png" alt="Foodee" /></a>
-    <nav class="nav-links" aria-label="Primary navigation">
-      <a href="index.html">Home</a>
-      <a href="html/menu.html">Menu</a>
-      <a href="html/admin.html">Admin</a>
-      <a href="html/about.html">About</a>
-      <a href="html/contact.html">Contact</a>
+<body class="admin-app-body" data-page="admin">
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-brand">
+      <img src="assets/brand/logo.png" alt="Foodee" />
+      <span>Management</span>
+    </div>
+
+    <nav class="admin-nav" aria-label="Admin sections">
+      <button class="active" type="button" data-admin-view="dashboard"><img src="assets/icons/home-check.png" alt="" /><span>Dashboard</span></button>
+      <button type="button" data-admin-view="orders"><img src="assets/icons/receipt-check.png" alt="" /><span>Customer Orders</span><b id="sideOrderCount">0</b></button>
+      <button type="button" data-admin-view="customers"><img src="assets/icons/user.png" alt="" /><span>Customers</span></button>
+      <button type="button" data-admin-view="menu"><img src="assets/icons/menu-list.png" alt="" /><span>Menu Management</span></button>
+      <button type="button" data-admin-view="analytics"><img src="assets/icons/star-filled.png" alt="" /><span>Analytics</span></button>
+      <button type="button" data-admin-view="messages"><img src="assets/icons/mail.png" alt="" /><span>Messages</span><b id="sideMessageCount">0</b></button>
+      <a href="html/database.html"><img src="assets/icons/calendar.png" alt="" /><span>Database Tables</span></a>
     </nav>
-    <div class="header-actions">
-      <label class="search-box" aria-label="Search food"><span class="search-icon" aria-hidden="true"></span><input id="globalSearch" type="search" placeholder="Search for food..." /></label>
-      <a class="cart-button" href="html/cart.html" aria-label="Open cart"><img src="assets/icons/cart.png" alt="" /><span data-cart-count>0</span></a>
-      <button class="sign-in" type="button" data-open-auth><img src="assets/icons/user.png" alt="" />Sign In</button>
-    </div>
-  </div>
-</header>
 
-<main>
-  <section class="admin-hero shell">
-    <div>
-      <p class="eyebrow"><img src="assets/icons/receipt-check.png" alt="" />Restaurant admin</p>
-      <h1>Full Admin Overview</h1>
-      <p>See orders, customer details, cart actions, wishlist saves, menu items, contact messages, payment totals, and browser session activity.</p>
+    <div class="admin-sidebar-bottom">
+      <a class="view-store-link" href="index.html"><img src="assets/icons/shopping-bag.png" alt="" /><span>View Customer Site</span></a>
+      <div class="admin-profile">
+        <div class="admin-avatar">A</div>
+        <div><strong data-admin-name>Admin</strong><span data-admin-role>Restaurant Admin</span></div>
+        <button type="button" id="adminLogout" title="Log out" aria-label="Log out">x</button>
+      </div>
     </div>
-    <div class="admin-actions">
-      <button class="btn btn-outline" type="button" id="refreshAdmin">Refresh</button>
-      <button class="btn btn-outline" type="button" id="clearAdmin">Clear Local Data</button>
-      <a class="btn btn-primary" href="html/menu.html"><img src="assets/icons/menu-list.png" alt="" />Open Menu</a>
-    </div>
-  </section>
+  </aside>
 
-  <section class="admin-stats shell" aria-label="Order summary">
-    <article><span>Total Orders</span><strong id="statOrders">0</strong></article>
-    <article><span>Revenue</span><strong id="statRevenue">BDT 0</strong></article>
-    <article><span>Cart Items</span><strong id="statCart">0</strong></article>
-    <article><span>Pending</span><strong id="statPending">0</strong></article>
-    <article><span>Wishlist</span><strong id="statWishlist">0</strong></article>
-    <article><span>Messages</span><strong id="statContacts">0</strong></article>
-  </section>
-
-  <section class="admin-panel admin-tables shell">
-    <div class="panel-head">
+  <div class="admin-workspace">
+    <header class="admin-topbar">
+      <button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="Open admin menu"><span></span><span></span><span></span></button>
       <div>
-        <h2>Database Tables</h2>
-        <p>University view of saved customers, cart activity, and order bill details.</p>
+        <h1 id="adminPageTitle">Dashboard</h1>
+        <p id="adminPageSubtitle">A clear overview of your restaurant activity.</p>
       </div>
-      <span class="table-note">Data saves in MySQL when local server is running.</span>
-    </div>
-
-    <div class="table-block">
-      <h3>Orders Table</h3>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Food Items</th>
-              <th>Payment</th>
-              <th>Total Bill</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody"></tbody>
-        </table>
+      <div class="admin-top-actions">
+        <label class="admin-global-search"><span class="search-icon" aria-hidden="true"></span><input id="adminGlobalSearch" type="search" placeholder="Search orders or customers" /></label>
+        <span class="database-pill" id="databasePill"><i></i><span>Checking database</span></span>
+        <button class="icon-action" type="button" id="refreshAdmin" title="Refresh data" aria-label="Refresh data">&#8635;</button>
       </div>
-    </div>
+    </header>
 
-    <div class="table-block">
-      <h3>Add To Cart Table</h3>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Customer / Session</th>
-              <th>Action</th>
-              <th>Food</th>
-              <th>Qty</th>
-              <th>Unit Price</th>
-              <th>Cart Total</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="cartTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="table-block">
-      <h3>Customers Table</h3>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Total Orders</th>
-              <th>Total Spent</th>
-            </tr>
-          </thead>
-          <tbody id="customersTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="admin-layout shell">
-    <section class="admin-panel order-board">
-      <div class="panel-head">
-        <div>
-          <h2>Customer Orders</h2>
-          <p>Complete order details from checkout.</p>
+    <main class="admin-main">
+      <section class="admin-view active" data-admin-panel="dashboard">
+        <div class="admin-welcome">
+          <div><span>Restaurant overview</span><h2>Welcome back, <b data-admin-name>Admin</b></h2><p>Orders, customers, menu and sales are organized in one place.</p></div>
+          <a class="admin-primary-btn" href="html/menu.html">View Live Menu</a>
         </div>
-        <label class="admin-search"><span class="search-icon" aria-hidden="true"></span><input id="adminSearch" type="search" placeholder="Search customer, phone, food..." /></label>
-      </div>
-      <div id="orderList" class="order-list"></div>
-      <div id="searchDetailList" class="search-detail-list"></div>
 
-      <section class="admin-panel embedded-panel menu-fill-panel">
-        <div class="panel-head compact">
-          <div>
-            <h2>Menu Products</h2>
-            <p>All visible food items with category and price.</p>
-          </div>
+        <div class="admin-stat-grid">
+          <article><div class="stat-icon green"><img src="assets/icons/receipt-check.png" alt="" /></div><div><span>Total Orders</span><strong id="statOrders">0</strong><small>All saved orders</small></div></article>
+          <article><div class="stat-icon blue"><img src="assets/icons/cart.png" alt="" /></div><div><span>Total Revenue</span><strong id="statRevenue">BDT 0</strong><small>Completed and active sales</small></div></article>
+          <article><div class="stat-icon amber"><img src="assets/icons/time-circle.png" alt="" /></div><div><span>Active Orders</span><strong id="statPending">0</strong><small>Needs attention</small></div></article>
+          <article><div class="stat-icon rose"><img src="assets/icons/user.png" alt="" /></div><div><span>Customers</span><strong id="statCustomers">0</strong><small>Registered customers</small></div></article>
+          <article><div class="stat-icon violet"><img src="assets/icons/menu-list.png" alt="" /></div><div><span>Menu Items</span><strong id="statProducts">0</strong><small>Currently available</small></div></article>
         </div>
-        <div id="productList" class="product-admin-list"></div>
+
+        <div class="dashboard-grid">
+          <section class="admin-card dashboard-orders">
+            <div class="admin-card-head"><div><h2>Recent Orders</h2><p>Latest customer orders and current status.</p></div><button class="text-action" type="button" data-go-view="orders">View All</button></div>
+            <div class="admin-table-scroll"><table class="business-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentOrdersBody"></tbody></table></div>
+          </section>
+          <section class="admin-card dashboard-activity">
+            <div class="admin-card-head"><div><h2>Customer Activity</h2><p>Recent cart and wishlist actions.</p></div></div>
+            <div class="activity-feed" id="dashboardActivity"></div>
+          </section>
+        </div>
       </section>
 
-      <div class="order-board-fill">
-        <section class="admin-panel embedded-panel">
-          <div class="panel-head compact">
-            <div>
-              <h2>Contact Messages</h2>
-              <p>Customer questions and support requests.</p>
-            </div>
-          </div>
-          <div id="contactList" class="contact-list"></div>
+      <section class="admin-view" data-admin-panel="orders">
+        <div class="view-heading"><div><h2>Customer Orders</h2><p>Review bills, food items, delivery details and order progress.</p></div><label class="view-search"><span class="search-icon"></span><input id="orderSearch" type="search" placeholder="Search name, phone, order or food" /></label></div>
+        <section class="admin-card">
+          <div class="filter-row" id="orderFilters"><button class="active" type="button" data-order-filter="all">All</button><button type="button" data-order-filter="Placed">Placed</button><button type="button" data-order-filter="Preparing">Preparing</button><button type="button" data-order-filter="On the Way">On the Way</button><button type="button" data-order-filter="Delivered">Delivered</button><button type="button" data-order-filter="Cancelled">Cancelled</button></div>
+          <div class="admin-table-scroll"><table class="business-table order-table"><thead><tr><th>Order</th><th>Customer Details</th><th>Food Items</th><th>Payment</th><th>Total Bill</th><th>Order Status</th><th>Date</th></tr></thead><tbody id="ordersTableBody"></tbody></table></div>
         </section>
+      </section>
 
-        <section class="admin-panel embedded-panel">
-          <div class="panel-head compact">
-            <div>
-              <h2>Customers</h2>
-              <p>Customer records and total spending.</p>
-            </div>
-          </div>
-          <div id="customerList" class="customer-list"></div>
+      <section class="admin-view" data-admin-panel="customers">
+        <div class="view-heading"><div><h2>Customers</h2><p>Contact details, order history and spending summary.</p></div><label class="view-search"><span class="search-icon"></span><input id="customerSearch" type="search" placeholder="Search name, phone or email" /></label></div>
+        <section class="admin-card">
+          <div class="admin-table-scroll"><table class="business-table customer-table"><thead><tr><th>Customer</th><th>Phone</th><th>Email</th><th>Orders</th><th>Cart Adds</th><th>Wishlist</th><th>Total Spent</th><th>Last Active</th></tr></thead><tbody id="customersTableBody"></tbody></table></div>
         </section>
-      </div>
+      </section>
+
+      <section class="admin-view" data-admin-panel="menu">
+        <div class="view-heading"><div><h2>Menu Management</h2><p>Add new food, update details or remove an item from the live menu.</p></div><button class="admin-primary-btn" type="button" id="addFoodButton">+ Add New Food</button></div>
+        <section class="admin-card">
+          <div class="menu-toolbar"><label class="view-search"><span class="search-icon"></span><input id="productSearch" type="search" placeholder="Search menu item" /></label><select id="productCategoryFilter" aria-label="Filter by category"><option value="all">All Categories</option></select></div>
+          <div class="menu-management-grid" id="menuManagementList"></div>
+        </section>
+      </section>
+
+      <section class="admin-view" data-admin-panel="analytics">
+        <div class="view-heading"><div><h2>Analytics</h2><p>Simple sales and menu insights from saved orders.</p></div></div>
+        <div class="analytics-summary">
+          <article><span>Average Order Value</span><strong id="averageOrderValue">BDT 0</strong></article>
+          <article><span>Delivered Orders</span><strong id="deliveredOrderCount">0</strong></article>
+          <article><span>Cart Activities</span><strong id="cartActivityCount">0</strong></article>
+          <article><span>Wishlist Saves</span><strong id="wishlistActivityCount">0</strong></article>
+        </div>
+        <div class="analytics-grid">
+          <section class="admin-card"><div class="admin-card-head"><div><h2>Sales by Day</h2><p>Revenue from the last seven days.</p></div></div><div class="bar-chart" id="salesChart"></div></section>
+          <section class="admin-card"><div class="admin-card-head"><div><h2>Order Status</h2><p>Current order distribution.</p></div></div><div class="metric-list" id="statusAnalytics"></div></section>
+          <section class="admin-card"><div class="admin-card-head"><div><h2>Top Ordered Food</h2><p>Most ordered menu items.</p></div></div><div class="rank-list" id="topFoods"></div></section>
+          <section class="admin-card"><div class="admin-card-head"><div><h2>Menu Categories</h2><p>Available items in each category.</p></div></div><div class="metric-list" id="categoryAnalytics"></div></section>
+        </div>
+      </section>
+
+      <section class="admin-view" data-admin-panel="messages">
+        <div class="view-heading"><div><h2>Contact Messages</h2><p>Questions and support requests submitted from the website.</p></div></div>
+        <div class="message-grid" id="contactList"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="admin-modal" id="foodModal" aria-hidden="true">
+    <section class="food-dialog" role="dialog" aria-modal="true" aria-labelledby="foodDialogTitle">
+      <div class="food-dialog-head"><div><h2 id="foodDialogTitle">Add New Food</h2><p>Changes are saved directly to the MySQL products table.</p></div><button type="button" id="closeFoodModal" aria-label="Close">x</button></div>
+      <form id="foodForm" class="food-form">
+        <input id="foodOriginalId" type="hidden" />
+        <label><span>Food Name</span><input id="foodName" type="text" required /></label>
+        <label><span>Product ID</span><input id="foodId" type="text" placeholder="auto-created-from-name" /></label>
+        <label><span>Category</span><input id="foodCategory" list="foodCategoryOptions" type="text" required /><datalist id="foodCategoryOptions"></datalist></label>
+        <label><span>Price (BDT)</span><input id="foodPrice" type="number" min="1" step="1" required /></label>
+        <label class="wide"><span>Image Path</span><input id="foodImage" type="text" placeholder="assets/food/menu-items/example.png" required /></label>
+        <label class="wide"><span>Description</span><textarea id="foodDescription" rows="4" required></textarea></label>
+        <div class="food-form-actions wide"><button class="admin-secondary-btn" type="button" id="cancelFoodModal">Cancel</button><button class="admin-primary-btn" type="submit">Save Food</button></div>
+      </form>
     </section>
+  </div>
 
-    <aside class="admin-side">
-      <section class="admin-panel">
-        <div class="panel-head compact">
-          <div>
-            <h2>Current Cart</h2>
-            <p>Items added in this browser.</p>
-          </div>
-        </div>
-        <div id="currentCartList" class="side-list"></div>
-      </section>
-
-      <section class="admin-panel">
-        <div class="panel-head compact">
-          <div>
-            <h2>Add-to-Cart Log</h2>
-            <p>Recent cart and wishlist actions.</p>
-          </div>
-        </div>
-        <div id="activityList" class="activity-list"></div>
-      </section>
-
-      <section class="admin-panel">
-        <div class="panel-head compact">
-          <div>
-            <h2>Wishlist</h2>
-            <p>Foods saved by this customer.</p>
-          </div>
-        </div>
-        <div id="wishlistList" class="side-list"></div>
-      </section>
-    </aside>
-  </section>
-</main>
-
-<footer class="site-footer"></footer>
-<div id="authMount"></div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="admin-toast" id="adminToast" role="status" aria-live="polite"></div>
   <script src="js/data.js"></script>
   <script src="js/cart.js"></script>
-  <script src="js/site.js"></script>
   <script src="js/api.js"></script>
   <script src="js/admin.js"></script>
 </body>

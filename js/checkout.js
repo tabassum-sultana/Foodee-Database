@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (phoneInput && !phoneInput.value.trim()) phoneInput.value = customer.phone;
     if (loginBox) {
       loginBox.querySelector("strong").textContent = `Logged in: ${customer.name}`;
-      loginBox.querySelector("p").textContent = `Phone: ${customer.phone}`;
+      loginBox.querySelector("p").textContent = `Phone: ${customer.phone}${customer.email ? ` | Email: ${customer.email}` : ""}`;
       loginBox.querySelector("button").textContent = "Change";
     }
   }
@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         id: loggedCustomer.id || null,
         name: loggedCustomer.name,
         phone: loggedCustomer.phone,
+        email: loggedCustomer.email || null,
         address: form.querySelector("#address").value.trim(),
         note: form.querySelector("#note").value.trim()
       },

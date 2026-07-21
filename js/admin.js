@@ -1,472 +1,380 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const orderList = document.querySelector("#orderList");
-  const searchDetailList = document.querySelector("#searchDetailList");
-  const currentCartList = document.querySelector("#currentCartList");
-  const activityList = document.querySelector("#activityList");
-  const wishlistList = document.querySelector("#wishlistList");
-  const contactList = document.querySelector("#contactList");
-  const customerList = document.querySelector("#customerList");
-  const productList = document.querySelector("#productList");
-  const ordersTableBody = document.querySelector("#ordersTableBody");
-  const cartTableBody = document.querySelector("#cartTableBody");
-  const customersTableBody = document.querySelector("#customersTableBody");
-  const search = document.querySelector("#adminSearch");
-  const refresh = document.querySelector("#refreshAdmin");
-  const clearAdmin = document.querySelector("#clearAdmin");
-  let orders = [];
-  let contacts = [];
-  let customers = [];
-  let events = [];
-  let query = "";
+  const state = {
+    orders: [],
+    customers: [],
+    products: [],
+    categories: [],
+    contacts: [],
+    events: [],
+    orderFilter: "all"
+  };
 
-  function date(value) {
-    if (!value) return "Just now";
-    return new Intl.DateTimeFormat("en-BD", {
-      dateStyle: "medium",
-      timeStyle: "short"
-    }).format(new Date(value));
+  const viewDetails = {
+    dashboard: ["Dashboard", "A clear overview of your restaurant activity."],
+    orders: ["Customer Orders", "Bills, delivery information and order progress."],
+    customers: ["Customers", "Contact details and spending history."],
+    menu: ["Menu Management", "Add, update or remove food from the live menu."],
+    analytics: ["Analytics", "Simple insights from the saved database records."],
+    messages: ["Contact Messages", "Customer questions submitted from the website."]
+  };
+
+  const money = (value) => `BDT ${Number(value || 0).toLocaleString("en-BD", { maximumFractionDigits: 0 })}`;
+  const safe = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+  const date = (value, short = false) => {
+    if (!value) return "Not available";
+    const options = short ? { month: "short", day: "numeric" } : { dateStyle: "medium", timeStyle: "short" };
+    return new Intl.DateTimeFormat("en-BD", options).format(new Date(value));
+  };
+  const initials = (name) => String(name || "Customer").split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+
+  function toast(message) {
+    const node = document.querySelector("#adminToast");
+    node.textContent = message;
+    node.classList.add("show");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => node.classList.remove("show"), 2200);
   }
 
-  function imageFor(id, fallback = "") {
-    return FoodeeCart.product(id)?.image || fallback || "assets/brand/logo-mark.png";
+  function getSavedSession() {
+    try { return JSON.parse(localStorage.getItem("foodee-admin-session")); }
+    catch { return null; }
+  }
+
+  function openView(name) {
+    const selected = viewDetails[name] ? name : "dashboard";
+    document.querySelectorAll("[data-admin-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.adminPanel === selected));
+    document.querySelectorAll("[data-admin-view]").forEach((button) => button.classList.toggle("active", button.dataset.adminView === selected));
+    document.querySelector("#adminPageTitle").textContent = viewDetails[selected][0];
+    document.querySelector("#adminPageSubtitle").textContent = viewDetails[selected][1];
+    document.querySelector("#adminSidebar").classList.remove("open");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function normalizeOrder(order) {
-    const totals = order.totals || {};
-    const customer = order.customer || {
-      name: order.customerName,
-      phone: order.phone,
-      address: order.address,
-      note: order.note
-    };
     const items = (order.items || []).map((item) => ({
-      id: item.id || item.productId,
-      name: item.name || item.productName,
-      qty: Number(item.qty || item.quantity || 0),
-      price: Number(item.price || item.unitPrice || 0),
-      lineTotal: Number(item.lineTotal || (item.price || item.unitPrice || 0) * (item.qty || item.quantity || 0))
+      name: item.productName || item.name || "Food item",
+      qty: Number(item.quantity || item.qty || 0),
+      price: Number(item.unitPrice || item.price || 0),
+      lineTotal: Number(item.lineTotal || 0)
     }));
-
     return {
-      id: order.id,
-      orderCode: order.orderCode,
-      customer,
+      ...order,
+      customer: order.customer || { name: order.customerName, phone: order.phone, address: order.address, email: order.email },
       items,
-      subtotal: Number(totals.subtotal ?? order.subtotal ?? items.reduce((sum, item) => sum + item.lineTotal, 0)),
-      delivery: Number(totals.delivery ?? order.deliveryFee ?? 0),
-      discount: Number(totals.discount ?? order.discount ?? 0),
-      total: Number(totals.total ?? order.total ?? 0),
-      method: order.method || order.paymentMethod || "Not selected",
-      status: order.status || order.paymentStatus || order.orderStatus || "Placed",
-      sessionId: order.sessionId,
-      createdAt: order.createdAt
+      total: Number(order.total || order.totals?.total || 0),
+      subtotal: Number(order.subtotal || order.totals?.subtotal || 0),
+      deliveryFee: Number(order.deliveryFee || order.totals?.delivery || 0),
+      paymentMethod: order.paymentMethod || order.method || "Not selected",
+      paymentStatus: order.paymentStatus || order.status || "Pending",
+      orderStatus: order.orderStatus || "Placed"
     };
   }
 
-  function mergeOrders(apiOrders = []) {
-    const map = new Map();
-    [...FoodeeCart.localOrders(), ...apiOrders].forEach((order) => {
-      if (!order?.orderCode) return;
-      map.set(order.orderCode, { ...map.get(order.orderCode), ...order });
-    });
-    return [...map.values()].map(normalizeOrder).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  function statusClass(status) {
+    if (status === "Delivered") return "delivered";
+    if (status === "Cancelled") return "cancelled";
+    return "";
   }
 
-  function renderStats(filteredOrders) {
-    const cartCount = FoodeeCart.read().reduce((sum, item) => sum + item.qty, 0);
-    const wishlistCount = readWishlist().length;
-    const pending = filteredOrders.filter((order) => /pending|placed/i.test(order.status)).length;
-    const revenue = filteredOrders.reduce((sum, order) => sum + order.total, 0);
-    document.querySelector("#statOrders").textContent = filteredOrders.length;
-    document.querySelector("#statRevenue").textContent = FoodeeCart.money(revenue);
-    document.querySelector("#statCart").textContent = cartCount;
-    document.querySelector("#statPending").textContent = pending;
-    document.querySelector("#statWishlist").textContent = wishlistCount;
-    document.querySelector("#statContacts").textContent = contacts.length;
+  function orderStatusControl(order) {
+    const options = ["Placed", "Preparing", "On the Way", "Delivered", "Cancelled"];
+    return `<select class="status-select" data-order-status="${safe(order.id)}" aria-label="Update ${safe(order.orderCode)} status">${options.map((status) => `<option value="${status}"${status === order.orderStatus ? " selected" : ""}>${status}</option>`).join("")}</select>`;
   }
 
-  function renderDatabaseStatus(status) {
-    const card = document.querySelector("#dbStatusCard");
-    const value = document.querySelector("#statDatabase");
-    if (!card || !value) return;
-    card.classList.toggle("connected", Boolean(status?.ok));
-    card.classList.toggle("disconnected", !status?.ok);
-    value.textContent = status?.ok ? "Connected" : "Offline";
-    card.title = status?.ok ? `Connected to ${status.dbName || "database"}` : (status?.message || "Database connection unavailable");
+  function renderStats() {
+    const revenue = state.orders.reduce((sum, order) => sum + order.total, 0);
+    const active = state.orders.filter((order) => ["Placed", "Preparing", "On the Way"].includes(order.orderStatus)).length;
+    document.querySelector("#statOrders").textContent = state.orders.length;
+    document.querySelector("#statRevenue").textContent = money(revenue);
+    document.querySelector("#statPending").textContent = active;
+    document.querySelector("#statCustomers").textContent = state.customers.length;
+    document.querySelector("#statProducts").textContent = state.products.length;
+    document.querySelector("#sideOrderCount").textContent = active;
+    document.querySelector("#sideMessageCount").textContent = state.contacts.length;
   }
 
-  function readWishlist() {
-    try { return JSON.parse(localStorage.getItem("foodee-wishlist")) || []; }
-    catch { return []; }
-  }
-
-  function readLocalContacts() {
-    try { return JSON.parse(localStorage.getItem("foodee-local-contacts")) || []; }
-    catch { return []; }
-  }
-
-  function orderMatches(order) {
-    if (!query) return true;
-    const blob = [
-      order.orderCode,
-      order.customer?.name,
-      order.customer?.phone,
-      order.customer?.address,
-      order.sessionId,
-      order.method,
-      order.status,
-      ...order.items.map((item) => item.name)
-    ].join(" ").toLowerCase();
-    return blob.includes(query);
-  }
-
-  function renderOrders() {
-    const filteredOrders = orders.filter(orderMatches);
-    renderStats(filteredOrders);
-    if (!orderList) return;
-    orderList.innerHTML = filteredOrders.length ? filteredOrders.map((order) => `
-      <article class="order-card">
-        <div class="order-top">
-          <div>
-            <div class="order-code">
-              <strong>${order.orderCode}</strong>
-              <span class="status-pill ${/pending/i.test(order.status) ? "pending" : ""}">${order.status}</span>
-            </div>
-            <div class="customer-lines">
-              <span><strong>Customer:</strong> ${order.customer?.name || "Guest customer"}</span>
-              <span><strong>Phone:</strong> ${order.customer?.phone || "Not given"}</span>
-              <span><strong>Address:</strong> ${order.customer?.address || "Not given"}</span>
-              ${order.customer?.note ? `<span><strong>Note:</strong> ${order.customer.note}</span>` : ""}
-              <span><strong>Payment:</strong> ${order.method}</span>
-              <span><strong>Subtotal:</strong> ${FoodeeCart.money(order.subtotal)} | <strong>Delivery:</strong> ${FoodeeCart.money(order.delivery)} | <strong>Discount:</strong> ${FoodeeCart.money(order.discount)}</span>
-              <span class="order-meta">${date(order.createdAt)}</span>
-            </div>
-          </div>
-          <div class="order-total">
-            <span>Grand total</span>
-            <strong>${FoodeeCart.money(order.total)}</strong>
-            <span>Delivery ${FoodeeCart.money(order.delivery)} | Discount ${FoodeeCart.money(order.discount)}</span>
-          </div>
-        </div>
-        <div class="order-items">
-          ${order.items.map((item) => `
-            <div class="order-item">
-              <img src="${asset(imageFor(item.id))}" alt="${item.name}" />
-              <div><h3>${item.name}</h3><p>${item.qty} x ${FoodeeCart.money(item.price)}</p></div>
-              <strong class="line-price">${FoodeeCart.money(item.lineTotal)}</strong>
-            </div>
-          `).join("")}
-        </div>
-      </article>
-    `).join("") : `<div class="empty-admin">${query ? "No matching orders. Cart activity, menu matches, messages, and bill details will appear below when available." : "No orders found yet. Place an order from the menu to see it here."}</div>`;
-    renderSearchDetails(filteredOrders);
-  }
-
-  function includesQuery(parts) {
-    if (!query) return false;
-    return parts.filter(Boolean).join(" ").toLowerCase().includes(query);
-  }
-
-  function customerForSession(sessionId) {
-    return orders.find((order) => order.sessionId && order.sessionId === sessionId)?.customer;
-  }
-
-  function renderSearchDetails(filteredOrders) {
-    if (!searchDetailList) return;
-    if (!query) {
-      searchDetailList.innerHTML = "";
-      return;
-    }
-
-    const matchedSessions = new Set(filteredOrders.map((order) => order.sessionId).filter(Boolean));
-    const matchedEvents = mergeEvents(events).filter((entry) => {
-      const matchedByText = includesQuery([
-        entry.sessionId,
-        entry.action,
-        entry.productName,
-        entry.category,
-        FoodeeCart.money(entry.unitPrice || 0)
-      ]);
-      return matchedByText || matchedSessions.has(entry.sessionId);
-    });
-    const matchedContacts = contacts.filter((contact) => includesQuery([
-      contact.name,
-      contact.email,
-      contact.subject,
-      contact.message
-    ]));
-    const matchedProducts = FoodeeData.products.filter((product) => includesQuery([
-      product.name,
-      product.category,
-      product.desc,
-      FoodeeCart.money(product.price)
-    ])).slice(0, 8);
-    const itemCount = filteredOrders.reduce((sum, order) => sum + order.items.reduce((total, item) => total + item.qty, 0), 0);
-    const subtotal = filteredOrders.reduce((sum, order) => sum + order.subtotal, 0);
-    const delivery = filteredOrders.reduce((sum, order) => sum + order.delivery, 0);
-    const discount = filteredOrders.reduce((sum, order) => sum + order.discount, 0);
-    const total = filteredOrders.reduce((sum, order) => sum + order.total, 0);
-    const hasResult = filteredOrders.length || matchedEvents.length || matchedContacts.length || matchedProducts.length;
-
-    searchDetailList.innerHTML = `
-      <section class="search-details">
-        <div class="panel-head compact">
-          <div>
-            <h2>Search Details</h2>
-            <p>Showing everything matched with "${query}".</p>
-          </div>
-        </div>
-        ${hasResult ? `
-          <div class="bill-summary">
-            <article><span>Matched orders</span><strong>${filteredOrders.length}</strong></article>
-            <article><span>Food items</span><strong>${itemCount}</strong></article>
-            <article><span>Subtotal</span><strong>${FoodeeCart.money(subtotal)}</strong></article>
-            <article><span>Delivery</span><strong>${FoodeeCart.money(delivery)}</strong></article>
-            <article><span>Discount</span><strong>${FoodeeCart.money(discount)}</strong></article>
-            <article><span>Total bill</span><strong>${FoodeeCart.money(total)}</strong></article>
-          </div>
-          ${filteredOrders.length ? `<div class="detail-block"><h3>Customer Orders</h3>${filteredOrders.map((order) => `
-            <div class="detail-row">
-              <div>
-                <strong>${order.customer?.name || "Guest customer"} | ${order.orderCode}</strong>
-                <p>${order.customer?.phone || "No phone"} | ${order.customer?.address || "No address"} | Session ${order.sessionId || "N/A"}</p>
-                <p>${order.items.map((item) => `${item.name} x${item.qty}`).join(", ")}</p>
-              </div>
-              <strong class="line-price">${FoodeeCart.money(order.total)}</strong>
-            </div>
-          `).join("")}</div>` : ""}
-          ${matchedEvents.length ? `<div class="detail-block"><h3>Cart / Wishlist Activity</h3>${matchedEvents.slice(0, 12).map((entry) => {
-            const customer = customerForSession(entry.sessionId);
-            return `
-              <div class="detail-row">
-                <div>
-                  <strong>${customer?.name || "Guest/session customer"} | ${entry.action}</strong>
-                  <p>${entry.productName}${entry.qty ? ` x${entry.qty}` : ""} | Session ${entry.sessionId}</p>
-                  <p>${date(entry.createdAt)}</p>
-                </div>
-                <strong class="line-price">${FoodeeCart.money((entry.unitPrice || 0) * (entry.qty || 1))}</strong>
-              </div>`;
-          }).join("")}</div>` : ""}
-          ${matchedContacts.length ? `<div class="detail-block"><h3>Messages</h3>${matchedContacts.map((contact) => `
-            <div class="detail-row">
-              <div>
-                <strong>${contact.name || "Guest"} | ${contact.subject || "Message"}</strong>
-                <p>${contact.email || "No email"}</p>
-                <p>${contact.message || ""}</p>
-              </div>
-            </div>
-          `).join("")}</div>` : ""}
-          ${matchedProducts.length && !filteredOrders.length ? `<div class="detail-block"><h3>Menu Matches</h3>${matchedProducts.map((product) => `
-            <div class="detail-row">
-              <div>
-                <strong>${product.name}</strong>
-                <p>${product.category} | ${product.desc}</p>
-              </div>
-              <strong class="line-price">${FoodeeCart.money(product.price)}</strong>
-            </div>
-          `).join("")}</div>` : ""}
-        ` : `<div class="empty-admin">No customer, order, cart, bill, or food details matched this search.</div>`}
-      </section>`;
-  }
-
-  function renderCart() {
-    const items = FoodeeCart.items();
-    if (!currentCartList) return;
-    currentCartList.innerHTML = items.length ? items.map(({ product, qty }) => `
-      <div class="cart-row">
-        <img src="${asset(product.image)}" alt="${product.name}" />
-        <div><h3>${product.name}</h3><p>${qty} in cart</p></div>
-        <strong class="line-price">${FoodeeCart.money(product.price * qty)}</strong>
-      </div>
-    `).join("") : `<div class="empty-admin">No active cart items.</div>`;
+  function renderRecentOrders() {
+    const body = document.querySelector("#recentOrdersBody");
+    body.innerHTML = state.orders.length ? state.orders.slice(0, 6).map((order) => `
+      <tr>
+        <td><strong>${safe(order.orderCode)}</strong><small>${date(order.createdAt, true)}</small></td>
+        <td><div class="table-customer"><span class="table-avatar">${safe(initials(order.customer?.name))}</span><div><strong>${safe(order.customer?.name || "Guest")}</strong><small>${safe(order.customer?.phone || "No phone")}</small></div></div></td>
+        <td class="food-cell">${safe(order.items.map((item) => `${item.name} x${item.qty}`).join(", ") || "No items")}</td>
+        <td class="money-cell">${money(order.total)}</td>
+        <td><span class="status-badge ${statusClass(order.orderStatus)}">${safe(order.orderStatus)}</span></td>
+      </tr>`).join("") : `<tr><td class="empty-table" colspan="5">No orders yet. Customer orders will appear here.</td></tr>`;
   }
 
   function renderActivity() {
-    const activity = mergeEvents(events);
-    if (!activityList) return;
-    activityList.innerHTML = activity.length ? activity.slice(0, 20).map((entry) => `
-      <div class="activity-entry">
-        <strong>${entry.action}</strong>
-        <p>${entry.productName}${entry.qty ? `, qty ${entry.qty}` : ""} | ${FoodeeCart.money(entry.unitPrice || 0)}</p>
-        <time>${date(entry.createdAt)} | Session ${entry.sessionId}</time>
-      </div>
-    `).join("") : `<div class="empty-admin">No cart activity yet.</div>`;
+    const list = document.querySelector("#dashboardActivity");
+    list.innerHTML = state.events.length ? state.events.slice(0, 10).map((event) => `
+      <article class="activity-item">
+        <img src="${/wishlist/i.test(event.action) ? "assets/icons/heart.png" : "assets/icons/cart.png"}" alt="" />
+        <div><strong>${safe(event.customerName || "Customer")} ${safe(String(event.action || "activity").toLowerCase())}</strong><p>${safe(event.productName)}${event.qty ? `, quantity ${safe(event.qty)}` : ""} | ${safe(event.phone || "No phone")}</p><time>${date(event.createdAt)}</time></div>
+      </article>`).join("") : `<div class="empty-table">No cart or wishlist activity yet.</div>`;
   }
 
-  function renderWishlist() {
-    const items = readWishlist().map((id) => FoodeeCart.product(id)).filter(Boolean);
-    if (!wishlistList) return;
-    wishlistList.innerHTML = items.length ? items.map((product) => `
-      <div class="cart-row">
-        <img src="${asset(product.image)}" alt="${product.name}" />
-        <div><h3>${product.name}</h3><p>${product.category}</p></div>
-        <strong class="line-price">${FoodeeCart.money(product.price)}</strong>
-      </div>
-    `).join("") : `<div class="empty-admin">No wishlist items.</div>`;
+  function orderMatches(order, query) {
+    const text = [order.orderCode, order.customer?.name, order.customer?.phone, order.customer?.address, order.paymentMethod, order.orderStatus, ...order.items.map((item) => item.name)].join(" ").toLowerCase();
+    return text.includes(query);
   }
 
-  function renderContacts() {
-    if (!contactList) return;
-    contactList.innerHTML = contacts.length ? contacts.map((contact) => `
-      <article class="contact-entry">
-        <strong>${contact.subject || "Customer message"}</strong>
-        <p><b>${contact.name || "Guest"}</b> | ${contact.email || "No email"}</p>
-        <p>${contact.message || ""}</p>
-        <time>${date(contact.createdAt)}</time>
-      </article>
-    `).join("") : `<div class="empty-admin">No contact messages yet.</div>`;
+  function renderOrders() {
+    const query = document.querySelector("#orderSearch").value.trim().toLowerCase();
+    const filtered = state.orders.filter((order) => (state.orderFilter === "all" || order.orderStatus === state.orderFilter) && orderMatches(order, query));
+    const body = document.querySelector("#ordersTableBody");
+    body.innerHTML = filtered.length ? filtered.map((order) => `
+      <tr>
+        <td><strong>${safe(order.orderCode)}</strong><small>ID: ${safe(order.id)}</small></td>
+        <td><div class="table-customer"><span class="table-avatar">${safe(initials(order.customer?.name))}</span><div><strong>${safe(order.customer?.name || "Guest")}</strong><small>${safe(order.customer?.phone || "No phone")}</small><small>${safe(order.customer?.email || "No email")}</small><small>${safe(order.customer?.address || "No address")}</small></div></div></td>
+        <td class="food-cell">${order.items.map((item) => `${safe(item.name)} x${safe(item.qty)}`).join("<br>") || "No items"}</td>
+        <td><strong>${safe(order.paymentMethod)}</strong><small>${safe(order.paymentStatus)}</small></td>
+        <td class="money-cell">${money(order.total)}<small>Delivery ${money(order.deliveryFee)}</small></td>
+        <td>${orderStatusControl(order)}</td>
+        <td>${date(order.createdAt)}</td>
+      </tr>`).join("") : `<tr><td class="empty-table" colspan="7">No matching orders found.</td></tr>`;
   }
 
   function renderCustomers() {
-    if (!customerList) return;
-    customerList.innerHTML = customers.length ? customers.map((customer) => `
-      <article class="customer-entry">
-        <strong>${customer.name}</strong>
-        <p>${customer.phone} | Orders ${customer.totalOrders || 0} | Spent ${FoodeeCart.money(customer.totalSpent || 0)}</p>
-      </article>
-    `).join("") : `<div class="empty-admin">No database customers yet.</div>`;
+    const query = document.querySelector("#customerSearch").value.trim().toLowerCase();
+    const customers = state.customers.filter((customer) => [customer.name, customer.phone, customer.email].join(" ").toLowerCase().includes(query));
+    document.querySelector("#customersTableBody").innerHTML = customers.length ? customers.map((customer) => `
+      <tr>
+        <td><div class="table-customer"><span class="table-avatar">${safe(initials(customer.name))}</span><div><strong>${safe(customer.name)}</strong><small>Customer #${safe(customer.id)}</small></div></div></td>
+        <td>${safe(customer.phone || "Not given")}</td>
+        <td>${safe(customer.email || "Not provided")}</td>
+        <td><strong>${safe(customer.totalOrders || 0)}</strong></td>
+        <td>${safe(customer.cartItems || 0)}</td>
+        <td>${safe(customer.wishlistItems || 0)}</td>
+        <td class="money-cell">${money(customer.totalSpent)}</td>
+        <td>${date(customer.updatedAt)}</td>
+      </tr>`).join("") : `<tr><td class="empty-table" colspan="8">No matching customers found.</td></tr>`;
   }
 
-  function renderProducts() {
-    if (!productList) return;
-    productList.innerHTML = FoodeeData.products.length ? FoodeeData.products.map((product) => `
-      <article class="product-admin-row">
-        <img src="${asset(product.image)}" alt="${product.name}" />
-        <div>
-          <h3>${product.name}</h3>
-          <p>${product.category} | Rating ${product.rating} | ${product.reviews} reviews</p>
-        </div>
-        <strong class="line-price">${FoodeeCart.money(product.price)}</strong>
-      </article>
-    `).join("") : `<div class="empty-admin">No products found.</div>`;
+  function renderMenu() {
+    const query = document.querySelector("#productSearch").value.trim().toLowerCase();
+    const category = document.querySelector("#productCategoryFilter").value;
+    const products = state.products.filter((product) => (category === "all" || product.category === category) && [product.name, product.category, product.desc].join(" ").toLowerCase().includes(query));
+    document.querySelector("#menuManagementList").innerHTML = products.length ? products.map((product) => `
+      <article class="managed-food">
+        <img src="${safe(product.image)}" alt="${safe(product.name)}" />
+        <div><h3>${safe(product.name)}</h3><p>${safe(product.category)}</p><strong>${money(product.price)}</strong></div>
+        <div class="managed-food-actions"><button type="button" data-edit-food="${safe(product.id)}">Edit Food</button><button class="remove-food" type="button" data-remove-food="${safe(product.id)}">Remove</button></div>
+      </article>`).join("") : `<div class="empty-table">No matching menu items found.</div>`;
   }
 
-  function emptyTableRow(message, columns) {
-    return `<tr><td class="muted-cell" colspan="${columns}">${message}</td></tr>`;
+  function renderMessages() {
+    document.querySelector("#contactList").innerHTML = state.contacts.length ? state.contacts.map((contact) => `
+      <article class="message-card">
+        <div class="message-card-head"><div><h3>${safe(contact.subject || "Customer message")}</h3><a href="mailto:${safe(contact.email)}">${safe(contact.name || "Customer")} | ${safe(contact.email)}</a></div><span class="status-badge">New</span></div>
+        <p>${safe(contact.message)}</p><time>${date(contact.createdAt)}</time>
+      </article>`).join("") : `<div class="admin-card empty-table">No contact messages yet.</div>`;
   }
 
-  function renderDataTables() {
-    if (ordersTableBody) {
-      ordersTableBody.innerHTML = orders.length ? orders.map((order) => `
-        <tr>
-          <td><strong>${order.orderCode || order.id || "N/A"}</strong></td>
-          <td>${order.customer?.name || "Guest customer"}</td>
-          <td>${order.customer?.phone || "Not given"}</td>
-          <td>${order.items.length ? order.items.map((item) => `${item.name} x${item.qty}`).join("<br>") : "No items"}</td>
-          <td>${order.method}<br><span class="muted-cell">${order.status}</span></td>
-          <td><strong>${FoodeeCart.money(order.total)}</strong><br><span class="muted-cell">Subtotal ${FoodeeCart.money(order.subtotal)}</span></td>
-          <td>${date(order.createdAt)}</td>
-        </tr>
-      `).join("") : emptyTableRow("No orders saved yet. Place an order from checkout to see it here.", 7);
-    }
-
-    if (cartTableBody) {
-      const activity = mergeEvents(events);
-      cartTableBody.innerHTML = activity.length ? activity.slice(0, 50).map((entry) => {
-        const customer = customerForSession(entry.sessionId);
-        return `
-          <tr>
-            <td>${customer?.name || "Session customer"}<br><span class="muted-cell">${entry.sessionId || "No session"}</span></td>
-            <td>${entry.action || "Added to cart"}</td>
-            <td>${entry.productName || "Unknown food"}${entry.optionSummary ? `<br><span class="muted-cell">${entry.optionSummary}</span>` : ""}</td>
-            <td>${entry.qty || 1}</td>
-            <td>${FoodeeCart.money(entry.unitPrice || 0)}</td>
-            <td>${FoodeeCart.money(entry.cartTotal || 0)}</td>
-            <td>${date(entry.createdAt)}</td>
-          </tr>
-        `;
-      }).join("") : emptyTableRow("No add-to-cart activity yet. Add food from menu to see it here.", 7);
-    }
-
-    if (customersTableBody) {
-      customersTableBody.innerHTML = customers.length ? customers.map((customer) => `
-        <tr>
-          <td><strong>${customer.name || "Customer"}</strong></td>
-          <td>${customer.phone || "Not given"}</td>
-          <td>${customer.totalOrders || 0}</td>
-          <td>${FoodeeCart.money(customer.totalSpent || 0)}</td>
-        </tr>
-      `).join("") : emptyTableRow("No database customers yet. Customer login/order will create records.", 4);
-    }
+  function metricRows(entries) {
+    const max = Math.max(1, ...entries.map((entry) => entry.value));
+    return entries.map((entry) => `<div class="metric-row"><span>${safe(entry.label)}</span><div class="metric-track"><div class="metric-fill" style="width:${Math.max(3, (entry.value / max) * 100)}%"></div></div><b>${safe(entry.value)}</b></div>`).join("");
   }
 
-  function mergeContacts(apiContacts = []) {
-    const map = new Map();
-    [...readLocalContacts(), ...apiContacts].forEach((contact) => {
-      const id = contact.id || `${contact.email}-${contact.createdAt}`;
-      map.set(id, contact);
+  function renderAnalytics() {
+    const revenue = state.orders.reduce((sum, order) => sum + order.total, 0);
+    document.querySelector("#averageOrderValue").textContent = money(state.orders.length ? revenue / state.orders.length : 0);
+    document.querySelector("#deliveredOrderCount").textContent = state.orders.filter((order) => order.orderStatus === "Delivered").length;
+    document.querySelector("#cartActivityCount").textContent = state.events.filter((event) => /cart|quantity/i.test(event.action)).length;
+    document.querySelector("#wishlistActivityCount").textContent = state.events.filter((event) => /added to wishlist/i.test(event.action)).length;
+
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const current = new Date();
+      current.setHours(0, 0, 0, 0);
+      current.setDate(current.getDate() - (6 - index));
+      const next = new Date(current); next.setDate(next.getDate() + 1);
+      const value = state.orders.filter((order) => new Date(order.createdAt) >= current && new Date(order.createdAt) < next).reduce((sum, order) => sum + order.total, 0);
+      return { label: current.toLocaleDateString("en-US", { weekday: "short" }), value };
     });
-    return [...map.values()].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    const maxSale = Math.max(1, ...days.map((day) => day.value));
+    document.querySelector("#salesChart").innerHTML = days.map((day) => `<div class="bar-column"><strong>${day.value ? Math.round(day.value / 1000) + "k" : "0"}</strong><div class="bar-track"><div class="bar-fill" style="height:${Math.max(2, (day.value / maxSale) * 100)}%"></div></div><span>${day.label}</span></div>`).join("");
+
+    const statuses = ["Placed", "Preparing", "On the Way", "Delivered", "Cancelled"].map((label) => ({ label, value: state.orders.filter((order) => order.orderStatus === label).length }));
+    document.querySelector("#statusAnalytics").innerHTML = metricRows(statuses);
+
+    const foodMap = new Map();
+    state.orders.forEach((order) => order.items.forEach((item) => foodMap.set(item.name, (foodMap.get(item.name) || 0) + item.qty)));
+    const foods = [...foodMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    document.querySelector("#topFoods").innerHTML = foods.length ? foods.map(([name, qty], index) => `<div class="rank-row"><b>${index + 1}</b><strong>${safe(name)}</strong><span>${qty} sold</span></div>`).join("") : `<div class="empty-table">Order data will create this ranking.</div>`;
+
+    const categoryMap = new Map();
+    state.products.forEach((product) => categoryMap.set(product.category, (categoryMap.get(product.category) || 0) + 1));
+    document.querySelector("#categoryAnalytics").innerHTML = metricRows([...categoryMap.entries()].map(([label, value]) => ({ label, value })));
   }
 
-  function mergeEvents(apiEvents = []) {
-    const map = new Map();
-    [...FoodeeCart.activity(), ...apiEvents].forEach((entry) => {
-      const id = entry.id || `${entry.sessionId}-${entry.action}-${entry.productId}-${entry.createdAt}`;
-      map.set(id, entry);
-    });
-    return [...map.values()].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  function fillCategoryControls() {
+    const filter = document.querySelector("#productCategoryFilter");
+    filter.innerHTML = `<option value="all">All Categories</option>${state.categories.map((category) => `<option value="${safe(category.name)}">${safe(category.name)}</option>`).join("")}`;
+    document.querySelector("#foodCategoryOptions").innerHTML = state.categories.map((category) => `<option value="${safe(category.name)}"></option>`).join("");
   }
 
-  async function load() {
-    let apiOrders = [];
-    let apiContacts = [];
-    let apiCustomers = [];
-    let apiEvents = [];
-    try {
-      renderDatabaseStatus(await FoodeeAPI.getHealth());
-    } catch (error) {
-      renderDatabaseStatus({ ok: false, message: error.message });
-    }
-    try {
-      await FoodeeAPI.loadProducts();
-    } catch {
-      // Static products stay available when the backend is not running.
-    }
-    try {
-      apiOrders = await FoodeeAPI.getOrders();
-    } catch {
-      apiOrders = [];
-    }
-    try {
-      apiContacts = await FoodeeAPI.getContacts();
-    } catch {
-      apiContacts = [];
-    }
-    try {
-      apiCustomers = await FoodeeAPI.getCustomers();
-    } catch {
-      apiCustomers = [];
-    }
-    try {
-      apiEvents = await FoodeeAPI.getCartEvents();
-    } catch {
-      apiEvents = [];
-    }
-    orders = mergeOrders(apiOrders);
-    contacts = mergeContacts(apiContacts);
-    customers = apiCustomers;
-    events = apiEvents;
-    renderOrders();
-    renderCart();
+  function openFoodModal(product = null) {
+    document.querySelector("#foodDialogTitle").textContent = product ? "Edit Food" : "Add New Food";
+    document.querySelector("#foodOriginalId").value = product?.id || "";
+    document.querySelector("#foodName").value = product?.name || "";
+    document.querySelector("#foodId").value = product?.id || "";
+    document.querySelector("#foodId").disabled = Boolean(product);
+    document.querySelector("#foodCategory").value = product?.category || "";
+    document.querySelector("#foodPrice").value = product?.price || "";
+    document.querySelector("#foodImage").value = product?.image || "assets/food/menu-items/";
+    document.querySelector("#foodDescription").value = product?.desc || "";
+    document.querySelector("#foodModal").classList.add("open");
+    document.querySelector("#foodModal").setAttribute("aria-hidden", "false");
+  }
+
+  function closeFoodModal() {
+    document.querySelector("#foodModal").classList.remove("open");
+    document.querySelector("#foodModal").setAttribute("aria-hidden", "true");
+    document.querySelector("#foodForm").reset();
+  }
+
+  function slug(value) {
+    return String(value).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  async function loadData(showMessage = false) {
+    const results = await Promise.allSettled([
+      FoodeeAPI.getHealth(),
+      FoodeeAPI.getOrders(),
+      FoodeeAPI.getCustomers(),
+      FoodeeAPI.getContacts(),
+      FoodeeAPI.getCartEvents(),
+      FoodeeAPI.getCategories(),
+      FoodeeAPI.loadProducts()
+    ]);
+    const [health, orders, customers, contacts, events, categories] = results;
+    const pill = document.querySelector("#databasePill");
+    const connected = health.status === "fulfilled" && health.value.ok;
+    pill.className = `database-pill ${connected ? "connected" : "offline"}`;
+    pill.querySelector("span").textContent = connected ? "MySQL Connected" : "Database Offline";
+    state.orders = orders.status === "fulfilled" ? orders.value.map(normalizeOrder) : [];
+    state.customers = customers.status === "fulfilled" ? customers.value : [];
+    state.contacts = contacts.status === "fulfilled" ? contacts.value : [];
+    state.events = events.status === "fulfilled" ? events.value : [];
+    state.categories = categories.status === "fulfilled" ? categories.value : [];
+    state.products = [...FoodeeData.products];
+    fillCategoryControls();
+    renderStats();
+    renderRecentOrders();
     renderActivity();
-    renderWishlist();
-    renderContacts();
+    renderOrders();
     renderCustomers();
-    renderProducts();
-    renderDataTables();
+    renderMenu();
+    renderMessages();
+    renderAnalytics();
+    if (showMessage) toast("Dashboard data refreshed");
   }
 
-  search?.addEventListener("input", () => {
-    query = search.value.trim().toLowerCase();
+  document.querySelectorAll("[data-admin-view]").forEach((button) => button.addEventListener("click", () => openView(button.dataset.adminView)));
+  document.querySelectorAll("[data-go-view]").forEach((button) => button.addEventListener("click", () => openView(button.dataset.goView)));
+  document.querySelector("#adminMenuToggle").addEventListener("click", () => document.querySelector("#adminSidebar").classList.toggle("open"));
+  document.querySelector("#refreshAdmin").addEventListener("click", () => loadData(true));
+  document.querySelector("#orderSearch").addEventListener("input", renderOrders);
+  document.querySelector("#customerSearch").addEventListener("input", renderCustomers);
+  document.querySelector("#productSearch").addEventListener("input", renderMenu);
+  document.querySelector("#productCategoryFilter").addEventListener("change", renderMenu);
+  document.querySelector("#adminGlobalSearch").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    document.querySelector("#orderSearch").value = event.currentTarget.value;
+    openView("orders");
     renderOrders();
   });
-  refresh?.addEventListener("click", load);
-  clearAdmin?.addEventListener("click", () => {
-    FoodeeCart.clearAdminData();
-    showToast("Local admin data cleared");
-    load();
+  document.querySelector("#orderFilters").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-order-filter]");
+    if (!button) return;
+    state.orderFilter = button.dataset.orderFilter;
+    document.querySelectorAll("[data-order-filter]").forEach((item) => item.classList.toggle("active", item === button));
+    renderOrders();
+  });
+  document.querySelector("#ordersTableBody").addEventListener("change", async (event) => {
+    const select = event.target.closest("[data-order-status]");
+    if (!select) return;
+    try {
+      await FoodeeAPI.updateOrderStatus(select.dataset.orderStatus, { orderStatus: select.value });
+      toast("Order status updated");
+      await loadData();
+    } catch (error) {
+      toast(error.message);
+      await loadData();
+    }
   });
 
-  load();
+  document.querySelector("#addFoodButton").addEventListener("click", () => openFoodModal());
+  document.querySelector("#closeFoodModal").addEventListener("click", closeFoodModal);
+  document.querySelector("#cancelFoodModal").addEventListener("click", closeFoodModal);
+  document.querySelector("#foodModal").addEventListener("click", (event) => { if (event.target.id === "foodModal") closeFoodModal(); });
+  document.querySelector("#foodName").addEventListener("input", (event) => {
+    const idInput = document.querySelector("#foodId");
+    if (!document.querySelector("#foodOriginalId").value) idInput.value = slug(event.target.value);
+  });
+  document.querySelector("#foodForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const originalId = document.querySelector("#foodOriginalId").value;
+    const payload = {
+      id: document.querySelector("#foodId").value || slug(document.querySelector("#foodName").value),
+      name: document.querySelector("#foodName").value.trim(),
+      category: document.querySelector("#foodCategory").value.trim(),
+      price: Number(document.querySelector("#foodPrice").value),
+      image: document.querySelector("#foodImage").value.trim(),
+      desc: document.querySelector("#foodDescription").value.trim()
+    };
+    try {
+      if (originalId) await FoodeeAPI.updateProduct(originalId, payload);
+      else await FoodeeAPI.saveProduct(payload);
+      closeFoodModal();
+      toast(originalId ? "Food updated successfully" : "New food added successfully");
+      await loadData();
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.querySelector("#menuManagementList").addEventListener("click", async (event) => {
+    const edit = event.target.closest("[data-edit-food]");
+    if (edit) {
+      openFoodModal(state.products.find((product) => product.id === edit.dataset.editFood));
+      return;
+    }
+    const remove = event.target.closest("[data-remove-food]");
+    if (!remove) return;
+    const product = state.products.find((item) => item.id === remove.dataset.removeFood);
+    if (!confirm(`Remove ${product?.name || "this food"} from the menu?`)) return;
+    try {
+      await FoodeeAPI.removeProduct(remove.dataset.removeFood);
+      toast("Food removed from the live menu");
+      await loadData();
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+
+  document.querySelector("#adminLogout").addEventListener("click", async () => {
+    try { await FoodeeAPI.logoutAdmin(); } catch { /* Local logout still completes. */ }
+    localStorage.removeItem("foodee-admin-session");
+    location.href = "index.html";
+  });
+
+  async function start() {
+    const saved = getSavedSession();
+    if (!saved?.token) {
+      location.replace("index.html?admin=1");
+      return;
+    }
+    try {
+      const session = await FoodeeAPI.getAdminSession();
+      document.querySelectorAll("[data-admin-name]").forEach((node) => { node.textContent = session.admin.name || "Admin"; });
+      document.querySelectorAll("[data-admin-role]").forEach((node) => { node.textContent = session.admin.role || "Restaurant Admin"; });
+      document.querySelector(".admin-avatar").textContent = initials(session.admin.name || "Admin");
+      await loadData();
+    } catch {
+      localStorage.removeItem("foodee-admin-session");
+      location.replace("index.html?admin=1");
+    }
+  }
+
+  start();
 });

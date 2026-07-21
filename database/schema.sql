@@ -38,9 +38,25 @@ CREATE TABLE IF NOT EXISTS customers (
   id INT AUTO_INCREMENT PRIMARY KEY,
   full_name VARCHAR(120) NOT NULL,
   phone VARCHAR(40) NOT NULL UNIQUE,
+  email VARCHAR(160),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS admin_users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(80) NOT NULL UNIQUE,
+  full_name VARCHAR(120) NOT NULL,
+  role VARCHAR(40) NOT NULL DEFAULT 'Admin',
+  password_hash VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO admin_users (username, full_name, role)
+VALUES ('admin', 'Restaurant Admin', 'Admin')
+ON DUPLICATE KEY UPDATE
+  full_name = VALUES(full_name),
+  role = VALUES(role);
 
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -79,6 +95,9 @@ CREATE TABLE IF NOT EXISTS order_items (
 CREATE TABLE IF NOT EXISTS cart_events (
   id INT AUTO_INCREMENT PRIMARY KEY,
   session_id VARCHAR(80) NOT NULL,
+  customer_id INT,
+  customer_name VARCHAR(120),
+  phone VARCHAR(40),
   action VARCHAR(80) NOT NULL,
   product_id VARCHAR(80) NOT NULL,
   product_name VARCHAR(160) NOT NULL,

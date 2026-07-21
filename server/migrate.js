@@ -1,4 +1,11 @@
+const crypto = require("crypto");
+require("dotenv").config();
 const db = require("./db");
+
+function passwordHash(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  return `${salt}:${crypto.scryptSync(password, salt, 64).toString("hex")}`;
+}
 
 async function tableExists(tableName) {
   const [rows] = await db.query(
@@ -69,10 +76,42 @@ async function migrate() {
       id INT AUTO_INCREMENT PRIMARY KEY,
       full_name VARCHAR(120) NOT NULL,
       phone VARCHAR(40) NOT NULL UNIQUE,
+      email VARCHAR(160),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(80) NOT NULL UNIQUE,
+      full_name VARCHAR(120) NOT NULL,
+      role VARCHAR(40) NOT NULL DEFAULT 'Admin',
+      password_hash VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    INSERT INTO admin_users (username, full_name, role)
+    VALUES ('admin', 'Restaurant Admin', 'Admin')
+    ON DUPLICATE KEY UPDATE
+      full_name = VALUES(full_name),
+      role = VALUES(role)
+  `);
+
+  if (await tableExists("customers")) {
+    await addColumn("customers", "email", "VARCHAR(160) NULL AFTER phone");
+  }
+
+  if (await tableExists("admin_users")) {
+    await addColumn("admin_users", "password_hash", "VARCHAR(255) NULL AFTER role");
+    await db.query(
+      "UPDATE admin_users SET password_hash = :passwordHash WHERE username = 'admin'",
+      { passwordHash: passwordHash(process.env.ADMIN_PASSWORD || "admin123") }
+    );
+  }
 
   await db.query(`
     CREATE TABLE IF NOT EXISTS orders (
@@ -116,6 +155,9 @@ async function migrate() {
     CREATE TABLE IF NOT EXISTS cart_events (
       id INT AUTO_INCREMENT PRIMARY KEY,
       session_id VARCHAR(80) NOT NULL,
+      customer_id INT,
+      customer_name VARCHAR(120),
+      phone VARCHAR(40),
       action VARCHAR(80) NOT NULL,
       product_id VARCHAR(80) NOT NULL,
       product_name VARCHAR(160) NOT NULL,
@@ -141,6 +183,9 @@ async function migrate() {
   }
 
   if (await tableExists("cart_events")) {
+    await addColumn("cart_events", "customer_id", "INT NULL AFTER session_id");
+    await addColumn("cart_events", "customer_name", "VARCHAR(120) NULL AFTER customer_id");
+    await addColumn("cart_events", "phone", "VARCHAR(40) NULL AFTER customer_name");
     await addColumn("cart_events", "option_summary", "VARCHAR(255) NULL AFTER category");
   }
 }
